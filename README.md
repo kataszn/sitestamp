@@ -35,6 +35,6 @@ pnpm dev
 ## Stack
 
 - **Monorepo** — Turborepo + pnpm workspaces
-- **Frontend** — Next.js (TypeScript)
+- **Frontend** — React + Vite (TypeScript)
 - **Backend** — Node.js (TypeScript)
 - **Shared** — Common types & utilities
