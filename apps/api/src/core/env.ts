@@ -11,8 +11,8 @@ const envSchema = z.object({
   LOG_LEVEL: z.string().default("info"),
   SERVICE_NAME: z.string().default("inspection-ai-api"),
 
-  // Database
   DATABASE_URL: z.string(),
+  CORS_ORIGIN: z.string().default("http://localhost:3000"),
 });
 
 // Parse and validate
