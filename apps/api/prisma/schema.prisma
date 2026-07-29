@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+model Visit {
+  id        String   @id @default(cuid())
+  userId    String
+  siteName  String
+  notes     String?
+  status    VisitStatus @default(OPEN)
+  createdAt DateTime @default(now())
+
+  evidence  Evidence[]
+  report    Report?
+}
+
+enum VisitStatus {
+  OPEN       // still collecting evidence
+  GENERATING // report submission in flight
+  COMPLETE
+}
+
+model Evidence {
+  id       String   @id @default(cuid())
+  visitId  String
+  visit    Visit    @relation(fields: [visitId], references: [id])
+  imageUrl String
+  caption  String?  // optional per-photo note, e.g. "underside of deck"
+  createdAt DateTime @default(now())
+}
+
+model Report {
+  id           String   @id @default(cuid())
+  visitId      String   @unique
+  visit        Visit    @relation(fields: [visitId], references: [id])
+  summary      String
+  severity     Severity
+  defects      Json     // DefectData[]
+  recommendation String
+  needsReview  Boolean  @default(false)
+  rawModelJson Json     // full Gemma response, kept for debugging/demo trust
+  createdAt    DateTime @default(now())
+}
+
+enum Severity {
+  LOW
+  MODERATE
+  HIGH
+  CRITICAL
+}

@@ -1,0 +1,12 @@
+{
+  "name": "@inspection/shared",
+  "version": "1.0.0",
+  "description": "Shared types and utilities for Inspection AI",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.26.2"
+}
