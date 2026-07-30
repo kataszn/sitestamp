@@ -7,12 +7,6 @@ import { ENV } from "./env";
 import { AppError, Errors } from "./errors";
 import type { Request, Response, NextFunction } from "express";
 
-const morganStream: morgan.StreamOptions = {
-  write(message) {
-    logger.info(message.trim());
-  },
-};
-
 export function registerMiddlewares(app: express.Express): void {
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true }));
@@ -34,10 +28,16 @@ export function registerMiddlewares(app: express.Express): void {
   );
 }
 
+const morganStream: morgan.StreamOptions = {
+  write(message) {
+    logger.info(message.trim());
+  },
+};
+
 export const errorHandler = (err: unknown, req: Request, res: Response, _next: NextFunction) => {
   const error = err instanceof AppError ? err : new AppError(Errors.INTERNAL);
 
-  const level = logLevelByCode[error.definition.code] || "error";
+  const level = logLevelByCategory(error.definition.category);
   logger[level](error.definition.code, {
     statusCode: error.definition.httpStatus,
     path: req.path,
@@ -53,10 +53,15 @@ export const errorHandler = (err: unknown, req: Request, res: Response, _next: N
   });
 };
 
-const logLevelByCode: Record<string, "debug" | "info" | "warn" | "error"> = {
-  INTERNAL_ERROR: "error",
-  NOT_FOUND: "warn",
-  VALIDATION: "info",
+const logLevelByCategory = (category: "system" | "validation" | "business"): "error" | "warn" | "info" => {
+  switch (category) {
+    case "system":
+      return "error";
+    case "validation":
+      return "info";
+    case "business":
+      return "warn";
+  }
 };
 
 export const notFoundHandler = (req: Request, res: Response, next: NextFunction) => {
