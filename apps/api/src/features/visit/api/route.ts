@@ -1,27 +1,14 @@
 import { Router } from "express";
+import * as handlers from "./handlers";
 
 export function createVisitRoutes(): Router {
   const router = Router({ mergeParams: true });
 
-  router.post("/", (req, res) => {
-    res.status(501).json({ message: "Not implemented" });
-  });
-
-  router.post("/:id/evidence", (req, res) => {
-    res.status(501).json({ message: "Not implemented" });
-  });
-
-  router.get("/:id", (req, res) => {
-    res.status(501).json({ message: "Not implemented" });
-  });
-
-  router.post("/:id/report", (req, res) => {
-    res.status(501).json({ message: "Not implemented" });
-  });
-
-  router.get("/:id/report", (req, res) => {
-    res.status(501).json({ message: "Not implemented" });
-  });
+  router.post("/", handlers.createVisit);
+  router.post("/:id/evidence", handlers.addEvidence);
+  router.get("/:id", handlers.getVisit);
+  router.post("/:id/report", handlers.generateReport);
+  router.get("/:id/report", handlers.getReport);
 
   return router;
 }
