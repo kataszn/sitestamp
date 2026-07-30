@@ -46,5 +46,11 @@ export const Errors = {
     message: "Validation failed.",
     httpStatus: 400,
     category: "validation",
+  },
+  BAD_REQUEST: {
+    code: "BAD_REQUEST",
+    message: "Bad request.",
+    httpStatus: 400,
+    category: "business",
   }
 } as const;

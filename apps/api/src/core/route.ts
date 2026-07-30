@@ -1,5 +1,5 @@
 import { Router } from "express";
-import visit from "../features/visit/api/route";
+import visit from "../features/visit/route";
 
 export function createV1Routes(): Router {
   const router = Router();

@@ -7,45 +7,51 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model Visit {
-  id        String   @id @default(cuid())
-  userId    String
-  siteName  String
-  notes     String?
-  status    VisitStatus @default(OPEN)
-  createdAt DateTime @default(now())
+  id            String      @id @default(cuid())
+  inspectorName String
+  siteName      String
+  notes         String?
+  status        VisitStatus @default(OPEN)
+  createdAt     DateTime    @default(now())
 
-  evidence  Evidence[]
-  report    Report?
+  evidence Evidence[]
+  report   Report?
 }
 
 enum VisitStatus {
-  OPEN       // still collecting evidence
+  OPEN // still collecting evidence
   GENERATING // report submission in flight
   COMPLETE
 }
 
 model Evidence {
-  id       String   @id @default(cuid())
-  visitId  String
-  visit    Visit    @relation(fields: [visitId], references: [id])
-  imageUrl String
-  caption  String?  // optional per-photo note, e.g. "underside of deck"
-  createdAt DateTime @default(now())
+  id            String        @id @default(cuid())
+  visitId       String
+  visit         Visit         @relation(fields: [visitId], references: [id])
+  imageUrl      String
+  caption       String? // final text, if captionSource is AUDIO, this is the transcript
+  captionSource CaptionSource @default(TEXT)
+  audioUrl      String? // kept for reference/playback, not sent to Gemma again
+  createdAt     DateTime      @default(now())
+}
+
+enum CaptionSource {
+  TEXT
+  VOICE
 }
 
 model Report {
-  id           String   @id @default(cuid())
-  visitId      String   @unique
-  visit        Visit    @relation(fields: [visitId], references: [id])
-  summary      String
-  severity     Severity
-  defects      Json     // DefectData[]
+  id             String   @id @default(cuid())
+  visitId        String   @unique
+  visit          Visit    @relation(fields: [visitId], references: [id])
+  summary        String
+  severity       Severity
+  defects        Json // DefectData[]
   recommendation String
-  needsReview  Boolean  @default(false)
-  rawModelJson Json     // full Gemma response, kept for debugging/demo trust
-  createdAt    DateTime @default(now())
+  needsReview    Boolean  @default(false)
+  rawModelJson   Json // full Gemma response, kept for debugging/demo trust
+  createdAt      DateTime @default(now())
 }
 
 enum Severity {

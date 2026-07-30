@@ -1,5 +1,3 @@
-import { Severity } from './severity';
-
 export interface DefectData {
   type: string;          // "crack", "spalling", "drainage_blockage", ...
   location: string;       // "underside of deck, mid-span"
@@ -14,4 +12,11 @@ export interface ReportDTO {
   defects: DefectData[];
   recommendation: string;
   needsReview: boolean;
+}
+
+export enum Severity {
+  LOW = 'LOW',
+  MODERATE = 'MODERATE',
+  HIGH = 'HIGH',
+  CRITICAL = 'CRITICAL'
 }
