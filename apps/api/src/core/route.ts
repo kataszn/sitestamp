@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { createVisitRoutes } from "../features/visit/api/route";
+import visit from "../features/visit/api/route";
 
 export function createV1Routes(): Router {
   const router = Router();
 
-  router.use("/visits", createVisitRoutes());
+  router.use("/visits", visit);
 
   return router;
 }

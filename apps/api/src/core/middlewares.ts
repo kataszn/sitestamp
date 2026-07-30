@@ -2,10 +2,12 @@ import cors from "cors";
 import helmet from "helmet";
 import express from "express";
 import morgan from "morgan";
+import { z } from 'zod';
+import type { Request, Response, NextFunction } from "express";
+
 import { logger } from "./logger";
 import { ENV } from "./env";
 import { AppError, Errors } from "./errors";
-import type { Request, Response, NextFunction } from "express";
 
 export function registerMiddlewares(app: express.Express): void {
   app.use(express.json({ limit: "10mb" }));
@@ -35,7 +37,17 @@ const morganStream: morgan.StreamOptions = {
 };
 
 export const errorHandler = (err: unknown, req: Request, res: Response, _next: NextFunction) => {
-  const error = err instanceof AppError ? err : new AppError(Errors.INTERNAL);
+  let error;
+  if (err instanceof AppError) {
+    error = err;
+  } else if (err instanceof Error) {
+    error =
+      ENV.NODE_ENV === "production"
+        ? new AppError(Errors.INTERNAL)
+        : new AppError(Errors.INTERNAL, { message: err.message, cause: err });
+  } else {
+    error = new AppError(Errors.INTERNAL);
+  }
 
   const level = logLevelByCategory(error.definition.category);
   logger[level](error.definition.code, {
@@ -71,4 +83,3 @@ export const notFoundHandler = (req: Request, res: Response, next: NextFunction)
     })
   );
 };
-  
