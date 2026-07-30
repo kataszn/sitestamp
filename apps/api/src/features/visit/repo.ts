@@ -27,7 +27,6 @@ export class VisitRepository {
           evidence: {
             create: {
               imageUrl: input.imageUrl,
-              audioUrl: input.audioUrl,
               caption: input.caption,
               captionSource: input.captionSource ?? 'TEXT',
             },

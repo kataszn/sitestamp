@@ -16,6 +16,8 @@
     "morgan": "^1.11.0",
     "multer": "^2.2.0",
     "pino": "^10.3.1",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^4.4.3"
   },
   "keywords": [],
@@ -28,6 +30,8 @@
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.2.0",
     "@types/node": "^26.1.2",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "dotenv": "^17.4.2",
     "pino-colada": "^2.2.2",
     "prisma": "~6.19.3",

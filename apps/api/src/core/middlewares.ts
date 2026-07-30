@@ -2,7 +2,6 @@ import cors from "cors";
 import helmet from "helmet";
 import express from "express";
 import morgan from "morgan";
-import { z } from 'zod';
 import type { Request, Response, NextFunction } from "express";
 
 import { logger } from "./logger";

@@ -9,7 +9,6 @@ const toEvidenceDTO = (evidence: PrismaVisit['evidence'][number]): EvidenceDTO =
   id: evidence.id,
   imageUrl: evidence.imageUrl,
   caption: evidence.caption,
-  audioUrl: evidence.audioUrl,
   captionSource: evidence.captionSource as EvidenceDTO['captionSource'],
 });
 

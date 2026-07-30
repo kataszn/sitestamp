@@ -13,7 +13,6 @@ export const addEvidence = z.object({
     id: z.cuid2(),
   }),
   body: z.object({
-    imageUrl: z.string().url({ message: 'Invalid image URL' }),
     caption: z.string().optional(),
     captionSource: z.enum(['TEXT', 'VOICE']).optional(),
   })

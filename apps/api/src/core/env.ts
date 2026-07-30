@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import path from "node:path";
 import { z } from "zod";
 
 dotenv.config({ quiet: true });
@@ -28,5 +29,9 @@ if (!parsedEnv.success) {
 
 const env = parsedEnv.data;
 
-export type EnvConfig = z.infer<typeof envSchema>;
-export const ENV: EnvConfig = { ...env };
+const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
+
+export type EnvConfig = z.infer<typeof envSchema> & {
+  UPLOAD_DIR: string;
+};
+export const ENV: EnvConfig = { ...env, UPLOAD_DIR };
