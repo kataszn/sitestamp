@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@google/genai": "^2.15.0",
     "@inspection/shared": "workspace:*",
     "@prisma/client": "~6.19.3",
     "cors": "^2.8.6",

@@ -3,7 +3,6 @@ export interface DefectData {
   location: string;       // "underside of deck, mid-span"
   severity: Severity;
   description: string;
-  evidenceIds: string[];  // which photos this defect is drawn from
 }
 
 export interface ReportDTO {
@@ -14,9 +13,4 @@ export interface ReportDTO {
   needsReview: boolean;
 }
 
-export enum Severity {
-  LOW = 'LOW',
-  MODERATE = 'MODERATE',
-  HIGH = 'HIGH',
-  CRITICAL = 'CRITICAL'
-}
+export type Severity = 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';

@@ -14,6 +14,7 @@ const envSchema = z.object({
 
   DATABASE_URL: z.string(),
   CORS_ORIGIN: z.string().default("http://localhost:3000"),
+  GEMINI_API_KEY: z.string(),
 });
 
 // Parse and validate

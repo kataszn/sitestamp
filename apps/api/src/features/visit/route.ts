@@ -9,6 +9,7 @@ import { validate, CaptionSource } from "@inspection/shared";
 import { evidenceUpload } from "../../middlewares/upload";
 import { AppError, Errors } from "../../core/errors";
 import { ENV } from "../../core/env";
+import { transcribeAudio } from "./gemma.client";
 
 
 const router: Router = Router({ mergeParams: true });
@@ -38,8 +39,8 @@ router.post("/:id/evidence", evidenceUpload, route(validate.addEvidence, async (
   let captionSource: CaptionSource = 'TEXT';
 
   if (audio) {
-    // TODO: transcribe audio file here
-    caption = req.body.caption;
+    const audioCaption = await transcribeAudio(audio.buffer, audio.mimetype);
+    caption = audioCaption;
     captionSource = 'VOICE';
   }
 

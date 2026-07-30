@@ -24,6 +24,19 @@ export const generateReport = z.object({
   }),
 });
 
+export const reportSchema = z.object({
+  summary: z.string().min(1, { message: 'Summary is required' }),
+  severity: z.enum(['LOW', 'MODERATE', 'HIGH', 'CRITICAL']),
+  defects: z.array(z.object({
+    type: z.string().min(1, { message: 'Defect type is required' }),
+    location: z.string().min(1, { message: 'Defect location is required' }),
+    severity: z.enum(['LOW', 'MODERATE', 'HIGH', 'CRITICAL']),
+    description: z.string().min(1, { message: 'Defect description is required' }),
+  })),
+  recommendation: z.string().min(1, { message: 'Recommendation is required' }),
+  needsReview: z.boolean(),
+});
+
 export const idParam = z.object({
   params: z.object({
     id: z.cuid2(),
