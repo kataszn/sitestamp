@@ -8,7 +8,7 @@ const envSchema = z.object({
     .enum(["development", "production", "test"])
     .default("development"),
   PORT: z.coerce.number().default(8000),
-  LOG_LEVEL: z.string().default("info"),
+  LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
   SERVICE_NAME: z.string().default("inspection-ai-api"),
 
   DATABASE_URL: z.string(),
