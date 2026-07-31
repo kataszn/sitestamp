@@ -1,11 +1,7 @@
-import type { Prisma } from "@prisma/client";
 import { EvidenceDTO, VisitDTO, ReportDTO } from "@inspectai/shared";
+import { Evidence, Report, Visit } from "../model";
 
-type PrismaVisit = Prisma.VisitGetPayload<{
-  include: { evidence: true; report: true }
-}>;
-
-const toEvidenceDTO = (evidence: PrismaVisit['evidence'][number]): EvidenceDTO => ({
+const toEvidenceDTO = (evidence: Evidence): EvidenceDTO => ({
   id: evidence.id,
   imageUrl: evidence.imageUrl,
   mimeType: evidence.mimeType,
@@ -13,26 +9,21 @@ const toEvidenceDTO = (evidence: PrismaVisit['evidence'][number]): EvidenceDTO =
   captionSource: evidence.captionSource as EvidenceDTO['captionSource'],
 });
 
-const toReportDTO = (report: NonNullable<PrismaVisit['report']>): ReportDTO => {
-  const defects = typeof report.defects === 'string'
-    ? JSON.parse(report.defects)
-    : report.defects;
-
-  const cleanedDefects = defects.map((d: any) => {
-    const { evidenceIndices, ...rest } = d;
-    return { ...rest };
-  });
-  
+const toReportDTO = (report: Report): ReportDTO => {
   return {
     summary: report.summary,
     severity: report.severity as ReportDTO['severity'],
-    defects: cleanedDefects as ReportDTO['defects'],
+    defects: report.defects.map((defect) => ({
+      ...defect,
+      evidenceIndices: defect.evidenceIndices,
+      evidenceIds: defect.evidenceIds,
+    })) as ReportDTO['defects'],
     recommendation: report.recommendation,
     needsReview: report.needsReview,
   };
 };
 
-const toVisitDTO = (visit: PrismaVisit): VisitDTO => ({
+const toVisitDTO = (visit: Visit): VisitDTO => ({
   id: visit.id,
   siteName: visit.siteName,
   inspectorName: visit.inspectorName,

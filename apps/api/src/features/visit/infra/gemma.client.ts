@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, ApiError } from '@google/genai';
-import { validate, type ReportDTO } from '@inspectai/shared';
+import { schema, type ReportDTO } from '@inspectai/shared';
 import { ENV } from '../../../core/env';
 import { AppError, Errors } from '../../../core/errors';
 
@@ -49,7 +49,8 @@ export async function transcribeAudio(
 export async function generateReport(
   siteName: string,
   notes: string | null,
-  evidence: EvidenceInput[]
+  evidence: EvidenceInput[],
+  onChunk?: (chunk: string) => void
 ): Promise<{ report: ReportDTO; raw: string }> {
   const prompt = buildInspectionPrompt(
     siteName,
@@ -57,7 +58,7 @@ export async function generateReport(
     evidence.map((e) => ({ caption: e.caption }))
   );
 
-  const response = await ai.models.generateContent({
+  const responseStream = await ai.models.generateContentStream({
     model: ENV.GENERATE_MODEL,
     contents: [
       {
@@ -79,13 +80,20 @@ export async function generateReport(
     },
   });
 
-  const raw = response.text;
+  let raw = '';
+  for await (const chunk of responseStream) {
+    if (chunk.text) {
+      raw += chunk.text;
+      onChunk?.(chunk.text);
+    }
+  }
+
   if (!raw) {
     throw new AppError(Errors.EMPTY_MODEL_RESPONSE);
   }
 
   const parsed = JSON.parse(raw);
-  return { report: validate.reportSchema.parse(parsed), raw };
+  return { report: schema.report.parse(parsed), raw };
 }
 
 interface EvidenceInput {

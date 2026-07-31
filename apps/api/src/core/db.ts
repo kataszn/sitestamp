@@ -12,6 +12,7 @@ export async function connectDB(): Promise<PrismaClient> {
   });
   await prisma.$connect();
   logger.info(`DB Connected (${ENV.NODE_ENV})`);
+  db = prisma;
 
   return prisma;
 }

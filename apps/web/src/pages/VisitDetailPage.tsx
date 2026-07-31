@@ -65,20 +65,15 @@ export const VisitDetailPage: React.FC = () => {
   const handleGenerateReport = async () => {
     if (!visit || visit.evidence.length === 0) return;
 
-    // Navigate immediately so user sees the generating view
-    navigate(`/visits/${id}/report`);
-
     setIsGenerating(true);
-    try {
-      await fetch(`${apiBase}/visits/${id}/report`, {
-        method: "POST",
-      });
-    } catch (err) {
+    navigate(`/visits/${id}/report?generate=1`);
+
+    void fetch(`${apiBase}/visits/${id}/report`, {
+      method: "POST",
+    }).catch((err) => {
       console.error(err);
       showToast("Failed to trigger report generation. Check if the AI models are configured.", "error");
-    } finally {
-      setIsGenerating(false);
-    }
+    });
   };
 
   const handleRemoveEvidence = async (evidenceId: string) => {

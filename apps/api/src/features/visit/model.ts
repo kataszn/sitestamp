@@ -7,7 +7,7 @@ export interface Visit {
   notes: string | null;
   status: 'OPEN' | 'GENERATING' | 'COMPLETE';
   evidence: Evidence[];
-  report?: Report | null;
+  report: Report | null;
 
   createdAt: Date;
 }
@@ -29,6 +29,7 @@ export interface Defect {
   location: string;       // "underside of deck, mid-span"
   severity: Severity;
   description: string;
+  evidenceIndices: number[];
   evidenceIds: string[];  // which photos this defect is drawn from
 }
 
@@ -37,7 +38,9 @@ export interface Evidence {
   id: string;
   visitId: string;
   imageUrl: string;
+  mimeType: string;
   caption: string | null;
   audioUrl: string | null;
   captionSource: 'TEXT' | 'VOICE' | null;
+  createdAt: Date;
 }

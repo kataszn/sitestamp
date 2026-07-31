@@ -24,7 +24,7 @@ export const generateReport = z.object({
   }),
 });
 
-export const reportSchema = z.object({
+export const report = z.object({
   summary: z.string().min(1, { message: 'Summary is required' }),
   severity: z.enum(['LOW', 'MODERATE', 'HIGH', 'CRITICAL']),
   defects: z.array(z.object({

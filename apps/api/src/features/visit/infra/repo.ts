@@ -2,9 +2,11 @@ import { CreateVisitInput, AddEvidenceInput, SaveReportInput } from "@inspectai/
 import { isPrismaNotFound, PrismaClientError } from '../../../utils/prisma';
 
 import { DB } from "../../../core/db";
+import { Evidence, Report, Visit } from "../model";
+import * as mapper from "./repo.mapper";
 
-async function create(input: CreateVisitInput) {
-  return await DB.visit.create({
+export async function create(input: CreateVisitInput): Promise<Visit> {
+  const record = await DB.visit.create({
     data: {
       siteName: input.siteName,
       inspectorName: input.inspectorName,
@@ -15,9 +17,11 @@ async function create(input: CreateVisitInput) {
       report: true,
     },
   });
+  return mapper.toDomain(record);
 }
 
-async function addEvidence(input: AddEvidenceInput) {
+
+export async function addEvidence(input: AddEvidenceInput): Promise<Evidence | null> {
   try {
     const visit = await DB.visit.update({
       where: { id: input.visitId },
@@ -36,8 +40,8 @@ async function addEvidence(input: AddEvidenceInput) {
         report: true,
       },
     });
-    // Return the newly created evidence (last in the array)
-    return visit.evidence.at(-1) ?? null;
+    const evidence = visit.evidence.at(-1) ?? null;
+    return evidence ? mapper.toDomainEvidence(evidence) : null;
   } catch (err) {
     if (err instanceof PrismaClientError && isPrismaNotFound(err)) {
       return null;
@@ -46,27 +50,29 @@ async function addEvidence(input: AddEvidenceInput) {
   }
 }
 
-async function find(visitId: string) {
-  return await DB.visit.findUnique({
+export async function find(visitId: string): Promise<Visit | null> {
+  const record = await DB.visit.findUnique({
     where: { id: visitId },
     include: {
       evidence: true,
       report: true,
     },
   });
+  return record ? mapper.toDomain(record) : null;
 }
 
-async function findAll() {
-  return await DB.visit.findMany({
+export async function findAll(): Promise<Visit[]> {
+  const records = await DB.visit.findMany({
     include: {
       evidence: true,
       report: true,
     },
   });
+  return records.map(mapper.toDomain);
 }
 
-async function saveReport(input: SaveReportInput) {
-  return DB.report.upsert({
+export async function saveReport(input: SaveReportInput): Promise<Report> {
+  const record = await DB.report.upsert({
     where: {
       visitId: input.visitId,
     },
@@ -88,27 +94,19 @@ async function saveReport(input: SaveReportInput) {
       rawModelJson: input.rawModelJson,
     },
   });
+  return mapper.toDomainReport(record);
 }
 
-async function updateStatus(visitId: string, status: 'OPEN' | 'GENERATING' | 'COMPLETE') {
-  return DB.visit.update({
+export async function updateStatus(visitId: string, status: Visit['status']): Promise<Visit> {
+  const record = await DB.visit.update({
     where: { id: visitId },
     data: { status },
   });
+  return mapper.toDomain(record);
 }
 
-async function removeEvidence(evidenceId: string) {
-  return DB.evidence.delete({
+export async function removeEvidence(evidenceId: string): Promise<void> {
+  await DB.evidence.delete({
     where: { id: evidenceId },
   });
-}
-
-export {
-  create,
-  addEvidence,
-  find,
-  findAll,
-  saveReport,
-  updateStatus,
-  removeEvidence
 }

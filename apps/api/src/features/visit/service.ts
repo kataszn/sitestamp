@@ -8,18 +8,18 @@ import type {
 } from "@inspectai/shared";
 import { AppError, Errors } from "../../core/errors";
 import * as repo from "./infra/repo";
-import * as mapper from "./api/dto.mapper";
+import * as mapper from "./api/mapper";
 import * as gemma from "./infra/gemma.client";
 import path from "node:path";
 import fs from "node:fs";
 import { ENV } from "../../core/env";
 
-const createVisit = async (input: CreateVisitInput): Promise<VisitDTO> => {
+export const createVisit = async (input: CreateVisitInput): Promise<VisitDTO> => {
   const visit = await repo.create(input);
   return mapper.toVisitDTO(visit);
 };
 
-const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO> => {
+export const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO> => {
   const evidence = await repo.addEvidence(input);
   if (!evidence) {
     throw new AppError(Errors.NOT_FOUND, { message: "Visit not found" });
@@ -27,7 +27,7 @@ const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO> => {
   return mapper.toEvidenceDTO(evidence);
 };
 
-const getVisit = async (visitId: string): Promise<VisitDTO> => {
+export const getVisit = async (visitId: string): Promise<VisitDTO> => {
   const visit = await repo.find(visitId);
   if (!visit) {
     throw new AppError(Errors.NOT_FOUND, { message: "Visit not found" });
@@ -35,7 +35,10 @@ const getVisit = async (visitId: string): Promise<VisitDTO> => {
   return mapper.toVisitDTO(visit);
 };
 
-const generateReport = async (visitId: string): Promise<ReportDTO> => {
+export const generateReport = async (
+  visitId: string,
+  onChunk?: (chunk: string) => void
+): Promise<ReportDTO> => {
   const visit = await getVisit(visitId);
   await repo.updateStatus(visitId, 'GENERATING');
 
@@ -55,7 +58,8 @@ const generateReport = async (visitId: string): Promise<ReportDTO> => {
   const { report, raw } = await gemma.generateReport(
     visit.siteName,
     visit.notes,
-    evidenceInputs
+    evidenceInputs,
+    onChunk
   );
 
   const resolved = resolveEvidenceIds(report.defects, visit.evidence);
@@ -76,7 +80,7 @@ function resolveEvidenceIds(defects: DefectData[], evidence: EvidenceDTO[]) {
   }));
 }
 
-const getReport = async (visitId: string): Promise<ReportDTO> => {
+export const getReport = async (visitId: string): Promise<ReportDTO> => {
   const visit = await repo.find(visitId);
   if (!visit) {
     throw new AppError(Errors.NOT_FOUND, { message: "Visit not found" });
@@ -90,17 +94,16 @@ const getReport = async (visitId: string): Promise<ReportDTO> => {
   return mapper.toReportDTO(report);
 };
 
-const updateVisitStatus = async (visitId: string, status: 'OPEN' | 'COMPLETE') => {
+export const updateVisitStatus = async (visitId: string, status: 'OPEN' | 'COMPLETE') => {
   await repo.updateStatus(visitId, status);
 };
 
-const removeEvidence = async (evidenceId: string) => {
+export const removeEvidence = async (evidenceId: string) => {
   await repo.removeEvidence(evidenceId);
 };
 
-const getAllVisits = async (): Promise<VisitDTO[]> => {
+export const getAllVisits = async (): Promise<VisitDTO[]> => {
   const visits = await repo.findAll();
   return visits.map(mapper.toVisitDTO);
 }
 
-export { createVisit, addEvidence, getVisit, generateReport, getReport, updateVisitStatus, removeEvidence, getAllVisits };
