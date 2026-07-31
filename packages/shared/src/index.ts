@@ -1,3 +1,3 @@
 export * from "./visit.types";
-export * as validate from "./schemas";
+export * as schema from "./schemas";
 export * from "./report.types";

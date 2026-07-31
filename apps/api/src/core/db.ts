@@ -2,6 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import { ENV } from "./env";
 import { logger } from "./logger";
 
+let db: PrismaClient | null = null;
+
 export async function connectDB(): Promise<PrismaClient> {
   const databaseUrl = ENV.DATABASE_URL;
 
@@ -23,3 +25,20 @@ export async function isDBConnected(prisma: PrismaClient): Promise<boolean> {
     return false;
   }
 }
+
+export function getDB(): PrismaClient {
+  if (!db) {
+    throw new Error("Database not connected. Call connectDB() first.");
+  }
+  return db;
+}
+
+// DB proxy for convenient access throughout the app
+export const DB = new Proxy({} as PrismaClient, {
+  get(_target, prop: string | symbol) {
+    if (typeof prop !== "string") {
+      return undefined;
+    }
+    return getDB()[prop as keyof PrismaClient];
+  },
+});

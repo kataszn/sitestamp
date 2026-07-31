@@ -1,90 +1,33 @@
 import { Router } from "express";
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { randomUUID } from 'node:crypto';
 
-import route from "../../middlewares/route";
-import * as services from "./service";
-import { validate, CaptionSource } from "@inspectai/shared";
-import { evidenceUpload } from "../../middlewares/upload";
-import { AppError, Errors } from "../../core/errors";
-import { ENV } from "../../core/env";
-import { transcribeAudio } from "./gemma.client";
+import validate from "../../../middlewares/validate";
+import * as handlers from "./handlers";
+import { schema } from "@inspectai/shared";
+import { evidenceUpload } from "../../../middlewares/upload";
 
 const router: Router = Router({ mergeParams: true });
 
-router.post("/", route(validate.createVisit, async (req, res) => {
-  const visit = await services.createVisit(req.body);
-  res.status(201).json(visit);
-}));
+router.post("/", validate(schema.createVisit), handlers.createVisit);
 
-router.get("/", route(undefined, async (req, res) => {
-  const visits = await services.getAllVisits();
-  res.status(200).json(visits);
-}));
+router.get("/", handlers.getAllVisits);
 
-router.post("/:id/evidence", evidenceUpload, route(validate.addEvidence, async (req, res) => {
-  const files = req.files as { image?: Express.Multer.File[]; audio?: Express.Multer.File[] };
-  const image = files.image?.[0];
-  const audio = files.audio?.[0];
+router.post(
+  "/:id/evidence",
+  evidenceUpload,
+  validate(schema.addEvidence),
+  handlers.addEvidence
+);
 
-  if (!image) {
-    throw new AppError(Errors.BAD_REQUEST, { message: 'Image file is required' });
-  }
+router.get("/:id", validate(schema.idParam), handlers.getVisit);
 
-  // audio: never touches disk, buffer goes straight to transcription and is discarded
-  let caption = req.body.caption;
-  let captionSource: CaptionSource = 'TEXT';
+router.post("/:id/report", validate(schema.generateReport), handlers.generateReport);
 
-  if (audio) {
-    const audioCaption = await transcribeAudio(audio.buffer, audio.mimetype);
-    caption = audioCaption;
-    captionSource = 'VOICE';
-  }
+router.get("/:id/report", validate(schema.idParam), handlers.getReport);
 
-  // image: write buffer to disk, we need it to persist for the report + Gemma call
-  const ext = path.extname(image.originalname) || '.jpg';
-  const filename = `${caption || randomUUID()}-${ext}`;
-  await fs.writeFile(path.join(ENV.UPLOAD_DIR, filename), image.buffer);
-  const imageUrl = `/uploads/${filename}`;
-  
+router.post("/:id/status", validate(schema.updateStatus), handlers.updateStatus);
 
-  const evidence = await services.addEvidence({
-    visitId: req.params.id,
-    imageUrl,
-    mimeType: image.mimetype,
-    caption,
-    captionSource,
-  });
-  res.status(200).json(evidence);
-}));
+router.post("/evidence/:id/remove", validate(schema.idParam), handlers.removeEvidence);
 
-router.get("/:id", route(validate.idParam, async (req, res) => {
-  const visit = await services.getVisit(req.params.id);
-  res.status(200).json(visit);
-}));
-
-router.post("/:id/report", route(validate.generateReport, async (req, res) => {
-  const report = await services.generateReport(req.params.id);
-  res.status(200).json(report);
-}));
-
-router.get("/:id/report", route(validate.idParam, async (req, res) => {
-  const report = await services.getReport(req.params.id);
-  res.status(200).json(report);
-}));
-
-router.post("/:id/status", route(validate.updateStatus, async (req, res) => {
-  const { status } = req.body;
-  await services.updateVisitStatus(req.params.id, status);
-  res.status(200).json({ message: `Visit status updated to ${status}` });
-}));
-
-router.post("/evidence/:id/remove", route(validate.idParam, async (req, res) => {
-  const evidenceId = req.params.id;
-  await services.removeEvidence(evidenceId);
-  res.status(204).send();
-}));
 
 export default router;
 
@@ -272,15 +215,11 @@ export default router;
  *                 description: New status for the visit
  *     responses:
  *       200:
- *         description: Status updated successfully
+ *         description: Visit found
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Visit status updated to COMPLETE
+ *               $ref: '#/components/schemas/VisitDTO'
  *       400:
  *         description: Validation error
  *         content:

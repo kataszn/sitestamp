@@ -2,7 +2,6 @@ import express from "express";
 import { registerMiddlewares, errorHandler, notFoundHandler } from "./core/middlewares";
 import { createV1Routes } from "./core/route";
 import { connectDB, isDBConnected } from "./core/db";
-import { createAppContext } from './core/app-context';
 import { openApiSpec } from "./core/openapi";
 import swaggerUi from "swagger-ui-express";
 import { ENV } from "./core/env";
@@ -16,7 +15,6 @@ export async function createServer(): Promise<express.Express> {
   await fs.mkdir(ENV.UPLOAD_DIR, { recursive: true });
 
   const db = await connectDB();
-  createAppContext(db);
 
   app.get("/health", async (_req: express.Request, res: express.Response) => {
     const connected = await isDBConnected(db);
