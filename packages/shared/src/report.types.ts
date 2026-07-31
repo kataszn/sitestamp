@@ -3,6 +3,8 @@ export interface DefectData {
   location: string;       // "underside of deck, mid-span"
   severity: Severity;
   description: string;
+  evidenceIndices: number[]; // indices of the evidence photos that show this defect
+  evidenceIds: string[]; // IDs of the evidence photos that show this defect, resolved from evidenceIndices
 }
 
 export interface ReportDTO {

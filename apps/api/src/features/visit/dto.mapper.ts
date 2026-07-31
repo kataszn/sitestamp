@@ -17,10 +17,16 @@ const toReportDTO = (report: NonNullable<PrismaVisit['report']>): ReportDTO => {
   const defects = typeof report.defects === 'string'
     ? JSON.parse(report.defects)
     : report.defects;
+
+  const cleanedDefects = defects.map((d: any) => {
+    const { evidenceIndices, ...rest } = d;
+    return { ...rest };
+  });
+  
   return {
     summary: report.summary,
     severity: report.severity as ReportDTO['severity'],
-    defects: defects as ReportDTO['defects'],
+    defects: cleanedDefects as ReportDTO['defects'],
     recommendation: report.recommendation,
     needsReview: report.needsReview,
   };

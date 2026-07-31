@@ -4,6 +4,7 @@ import type {
   VisitDTO,
   EvidenceDTO,
   ReportDTO,
+  DefectData,
 } from "@inspection/shared";
 import { CTX } from "../../core/app-context";
 import { AppError, Errors } from "../../core/errors";
@@ -57,21 +58,36 @@ const generateReport = async (visitId: string): Promise<ReportDTO> => {
     evidenceInputs
   );
 
-  await CTX.repo.visit.saveReport({ visitId, ...report, rawModelJson: raw });
+  const resolved = resolveEvidenceIds(report.defects, visit.evidence);
+  report.defects = resolved;
+
+  const saved = await CTX.repo.visit.saveReport({ visitId, ...report, rawModelJson: raw });
   await CTX.repo.visit.updateStatus(visitId, 'COMPLETE');
 
-  return report;
+  return mapper.toReportDTO(saved);
 };
 
+function resolveEvidenceIds(defects: DefectData[], evidence: EvidenceDTO[]) {
+  return defects.map((d) => ({
+    ...d,
+    evidenceIds: d.evidenceIndices
+      .filter((i) => i >= 0 && i < evidence.length)
+      .map((i) => evidence[i]!.id),
+  }));
+}
+
 const getReport = async (visitId: string): Promise<ReportDTO> => {
-  const visit = await getVisit(visitId);
+  const visit = await CTX.repo.visit.find(visitId);
+  if (!visit) {
+    throw new AppError(Errors.NOT_FOUND, { message: "Visit not found" });
+  }
   const report = visit.report;
   if (!report) {
     throw new AppError(Errors.NOT_FOUND, {
       message: `Report not found. Generate one first.`,
     });
   }
-  return report;
+  return mapper.toReportDTO(report);
 };
 
 const updateVisitStatus = async (visitId: string, status: 'OPEN' | 'COMPLETE') => {

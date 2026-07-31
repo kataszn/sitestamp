@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { VisitDTO } from "@inspection/shared";
 import SeverityGauge from "./SeverityGauge";
@@ -11,10 +11,25 @@ interface ReportViewProps {
 export const ReportView: React.FC<ReportViewProps> = ({ visit }) => {
   const navigate = useNavigate();
   const { report, evidence, id, siteName, createdAt } = visit;
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const evidenceRef = useRef<HTMLDivElement>(null);
 
   if (!report) {
     return <div className="state-message">No report generated for this visit yet.</div>;
   }
+
+  const selectedEvidenceIds = new Set(
+    selectedIndex !== null ? report.defects[selectedIndex]?.evidenceIds ?? [] : []
+  );
+
+  // Scroll the first highlighted evidence chip into view when a defect is selected
+  useEffect(() => {
+    if (selectedIndex === null || !evidenceRef.current) return;
+    const firstHighlighted = evidenceRef.current.querySelector<HTMLElement>(".evidence-chip.highlighted");
+    if (firstHighlighted) {
+      firstHighlighted.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [selectedIndex]);
 
   // Get the media base URL by stripping '/v1' from the API base URL
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/v1";
@@ -95,7 +110,13 @@ export const ReportView: React.FC<ReportViewProps> = ({ visit }) => {
           </h2>
           <div>
             {report.defects.map((defect, index) => (
-              <DefectItem key={index} defect={defect} index={index} />
+              <DefectItem
+                key={index}
+                defect={defect}
+                index={index}
+                selected={selectedIndex === index}
+                onClick={() => setSelectedIndex(selectedIndex === index ? null : index)}
+              />
             ))}
           </div>
         </div>
@@ -115,9 +136,9 @@ export const ReportView: React.FC<ReportViewProps> = ({ visit }) => {
           <h2 className="section-title">
             Evidence <span className="count">({evidence.length})</span>
           </h2>
-          <div className="evidence-list">
+          <div className="evidence-list" ref={evidenceRef}>
             {evidence.map((item) => (
-              <div key={item.id} className="evidence-chip">
+              <div key={item.id} className={`evidence-chip${selectedEvidenceIds.has(item.id) ? ' highlighted' : ''}`}>
                 <img
                   className="thumb"
                   src={getMediaUrl(item.imageUrl)}

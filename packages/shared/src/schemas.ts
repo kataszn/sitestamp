@@ -32,6 +32,8 @@ export const reportSchema = z.object({
     location: z.string().min(1, { message: 'Defect location is required' }),
     severity: z.enum(['LOW', 'MODERATE', 'HIGH', 'CRITICAL']),
     description: z.string().min(1, { message: 'Defect description is required' }),
+    evidenceIndices: z.array(z.number().int()).default([]),
+    evidenceIds: z.array(z.string().cuid2()).default([]),
   })),
   recommendation: z.string().min(1, { message: 'Recommendation is required' }),
   needsReview: z.boolean(),

@@ -4,13 +4,21 @@ import { DefectData } from "@inspection/shared";
 interface DefectItemProps {
   defect: DefectData;
   index: number;
+  selected: boolean;
+  onClick: () => void;
 }
 
-export const DefectItem: React.FC<DefectItemProps> = ({ defect, index }) => {
+export const DefectItem: React.FC<DefectItemProps> = ({ defect, index, selected, onClick }) => {
   const formattedIndex = String(index + 1).padStart(2, "0");
 
   return (
-    <div className="defect">
+    <div
+      className={`defect${selected ? ' selected' : ''}`}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick()}
+    >
       <div className="defect-num">{formattedIndex}</div>
       <div className="defect-body">
         <div className="defect-head">

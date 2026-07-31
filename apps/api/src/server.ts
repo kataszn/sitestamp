@@ -29,7 +29,7 @@ export async function createServer(): Promise<express.Express> {
   });
 
   // Swagger UI
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
+  app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiSpec));
 
   // Serve uploaded files
   app.use("/uploads", express.static(ENV.UPLOAD_DIR));

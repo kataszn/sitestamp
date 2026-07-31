@@ -85,6 +85,7 @@ export async function generateReport(
   }
 
   const parsed = JSON.parse(raw);
+  console.log('DEBUG: Parsed report from Gemini API:', parsed);
   return { report: validate.reportSchema.parse(parsed), raw };
 }
 
@@ -108,8 +109,9 @@ const GEMMA_REPORT_SCHEMA = {
           location: { type: Type.STRING },
           severity: { type: Type.STRING, enum: ['LOW', 'MODERATE', 'HIGH', 'CRITICAL'] },
           description: { type: Type.STRING },
+          evidenceIndices: { type: Type.ARRAY, items: { type: Type.INTEGER } }
         },
-        required: ['type', 'location', 'severity', 'description'],
+        required: ['type', 'location', 'severity', 'description', 'evidenceIndices'],
       },
     },
     recommendation: { type: Type.STRING },
@@ -131,12 +133,8 @@ Analyze the supplied inspection evidence and prepare a professional infrastructu
 
 Site: ${siteName}
 Inspector notes: ${notes ?? "none provided"}
-Inspection evidence (in order): ${evidence
-    .map((e, i) => {
-      const caption = e.caption ? `"${e.caption}"` : "no caption";
-      return JSON.stringify({ index: i + 1, caption });
-    })
-    .join(", ")}
+Inspection evidence: Photos are provided in this order, numbered from 0: ${evidence.map((_, i) => i).join(', ')}.
+For each defect, include evidenceIndices: an array of the photo number(s) that show this defect.
 
 Instructions:
 
@@ -166,7 +164,7 @@ Respond ONLY with JSON matching this shape, no other text:
 {
   "summary": string,
   "severity": "LOW" | "MODERATE" | "HIGH" | "CRITICAL",
-  "defects": [{ "type": string, "location": string, "severity": string, "description": string }],
+  "defects": [{ "type": string, "location": string, "severity": string, "description": string, "evidenceIndices": number[] }],
   "recommendation": string,
   "needsReview": boolean
 }`;
