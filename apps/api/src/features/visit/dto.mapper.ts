@@ -27,6 +27,7 @@ const toVisitDTO = (visit: PrismaVisit): VisitDTO => ({
   inspectorName: visit.inspectorName,
   notes: visit.notes,
   status: visit.status,
+  createdAt: visit.createdAt.toISOString(),
   evidence: visit.evidence.map(toEvidenceDTO),
   report: visit.report ? toReportDTO(visit.report) : null,
 });
