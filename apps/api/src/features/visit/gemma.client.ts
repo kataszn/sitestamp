@@ -85,7 +85,6 @@ export async function generateReport(
   }
 
   const parsed = JSON.parse(raw);
-  console.log('DEBUG: Parsed report from Gemini API:', parsed);
   return { report: validate.reportSchema.parse(parsed), raw };
 }
 

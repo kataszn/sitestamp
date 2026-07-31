@@ -127,7 +127,7 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
       </h3>
 
       <div className="form-group">
-        <label htmlFor="evidenceImage">Photo Upload (Required) *</label>
+        <label htmlFor="evidenceImage">Photo (Required) *</label>
         <input
           id="evidenceImage"
           type="file"
@@ -153,7 +153,7 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
             onClick={() => setCaptionMode("text")}
             disabled={isUploading}
           >
-            Type Caption
+            Text Caption
           </button>
           <button
             type="button"
@@ -166,7 +166,7 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
             onClick={() => setCaptionMode("audio")}
             disabled={isUploading}
           >
-            Record Audio Caption
+            Voice Caption
           </button>
         </div>
       </div>
@@ -186,7 +186,7 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
         </div>
       ) : (
         <div className="form-group">
-          <label>Audio Caption (wav)</label>
+          <label>Voice Caption</label>
           <div className="audio-recorder">
             {isRecording ? (
               <div className="recording-indicator">
@@ -195,7 +195,7 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
               </div>
             ) : (
               <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "11px", color: "var(--steel)" }}>
-                {audioBlob ? "🎙️ Audio caption recorded successfully!" : "No audio caption recorded yet."}
+                {audioBlob ? "🎙️ Voice caption recorded successfully!" : "No voice caption recorded yet."}
               </div>
             )}
 
@@ -231,7 +231,7 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
           type="submit"
           className="btn"
           style={{ width: "100%" }}
-          disabled={isUploading || !image || (captionMode === "audio" && !audioBlob && !isRecording)}
+          disabled={isUploading || !image}
         >
           {isUploading ? "Uploading Evidence..." : "Add Evidence"}
         </button>

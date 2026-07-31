@@ -8,6 +8,7 @@ export const ReportPage: React.FC = () => {
   const [visit, setVisit] = useState<VisitDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isGeneratingRef = React.useRef(false);
 
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/v1";
 
@@ -19,6 +20,13 @@ export const ReportPage: React.FC = () => {
       }
       const data = await response.json() as VisitDTO;
       setVisit(data);
+
+      // If still generating, keep polling
+      if (data.status === "GENERATING") {
+        isGeneratingRef.current = true;
+      } else {
+        isGeneratingRef.current = false;
+      }
     } catch (err) {
       console.error(err);
       setError("Unable to load inspection report. Please verify backend state.");
@@ -29,17 +37,17 @@ export const ReportPage: React.FC = () => {
 
   useEffect(() => {
     fetchVisit();
-    // Poll state if generating report
-    let timer: number | null = null;
-    if (visit?.status === "GENERATING") {
-      timer = window.setInterval(() => {
-        fetchVisit();
-      }, 5000);
-    }
-    return () => {
-      if (timer) clearInterval(timer);
-    };
-  }, [visit?.status, fetchVisit]);
+
+    const timer = window.setInterval(() => {
+      if (!isGeneratingRef.current) {
+        clearInterval(timer);
+        return;
+      }
+      fetchVisit();
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [fetchVisit]);
 
   if (isLoading) {
     return <div className="state-message">Retrieving AI inspection report details...</div>;

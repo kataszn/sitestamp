@@ -12,6 +12,7 @@ export const ReportView: React.FC<ReportViewProps> = ({ visit }) => {
   const navigate = useNavigate();
   const { report, evidence, id, siteName, createdAt } = visit;
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const evidenceRef = useRef<HTMLDivElement>(null);
 
   if (!report) {
@@ -137,8 +138,13 @@ export const ReportView: React.FC<ReportViewProps> = ({ visit }) => {
             Evidence <span className="count">({evidence.length})</span>
           </h2>
           <div className="evidence-list" ref={evidenceRef}>
-            {evidence.map((item) => (
-              <div key={item.id} className={`evidence-chip${selectedEvidenceIds.has(item.id) ? ' highlighted' : ''}`}>
+            {evidence.map((item, idx) => (
+              <div
+                key={item.id}
+                className={`evidence-chip${selectedEvidenceIds.has(item.id) ? ' highlighted' : ''}`}
+                onClick={() => setLightboxIndex(idx)}
+                style={{ cursor: "pointer" }}
+              >
                 <img
                   className="thumb"
                   src={getMediaUrl(item.imageUrl)}
@@ -170,6 +176,80 @@ export const ReportView: React.FC<ReportViewProps> = ({ visit }) => {
           </button>
         </div>
       </div>
+
+      {/* Lightbox */}
+      {lightboxIndex !== null && evidence && (() => {
+        const item = evidence[lightboxIndex];
+        if (!item) return null;
+        return (
+        <div
+          onClick={() => setLightboxIndex(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1000,
+            background: "rgba(0,0,0,0.85)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+          }}
+        >
+          <button
+            onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex === 0 ? evidence.length - 1 : lightboxIndex - 1); }}
+            style={{
+              position: "absolute", left: "20px", top: "50%", transform: "translateY(-50%)",
+              background: "rgba(255,255,255,0.15)", border: "none", color: "#fff",
+              fontSize: "32px", width: "52px", height: "52px", display: "flex",
+              alignItems: "center", justifyContent: "center", cursor: "pointer",
+              borderRadius: "50%", transition: "background 0.15s", zIndex: 1001,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.3)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.15)")}
+          >←</button>
+
+          <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", maxWidth: "90vw", maxHeight: "90vh" }}>
+            <img
+              src={getMediaUrl(item.imageUrl)}
+              alt={item.caption || "Evidence"}
+              style={{ maxWidth: "100%", maxHeight: item.caption ? "75vh" : "85vh", objectFit: "contain", borderRadius: "4px" }}
+            />
+            {item.caption && <p style={{ margin: 0, color: "#fff", fontSize: "15px", lineHeight: "1.5", textAlign: "center", maxWidth: "600px" }}>{item.caption}</p>}
+          </div>
+
+          <button
+            onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex === evidence.length - 1 ? 0 : lightboxIndex + 1); }}
+            style={{
+              position: "absolute", right: "20px", top: "50%", transform: "translateY(-50%)",
+              background: "rgba(255,255,255,0.15)", border: "none", color: "#fff",
+              fontSize: "32px", width: "52px", height: "52px", display: "flex",
+              alignItems: "center", justifyContent: "center", cursor: "pointer",
+              borderRadius: "50%", transition: "background 0.15s", zIndex: 1001,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.3)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.15)")}
+          >→</button>
+
+          <button
+            onClick={() => setLightboxIndex(null)}
+            style={{
+              position: "absolute", top: "16px", right: "20px",
+              background: "none", border: "none", color: "#fff", fontSize: "28px",
+              cursor: "pointer", width: "44px", height: "44px", display: "flex",
+              alignItems: "center", justifyContent: "center", zIndex: 1001,
+              fontFamily: "IBM Plex Mono, monospace",
+            }}
+          >×</button>
+
+          <div style={{
+            position: "absolute", bottom: "24px", left: "50%", transform: "translateX(-50%)",
+            color: "rgba(255,255,255,0.6)", fontFamily: "IBM Plex Mono, monospace",
+            fontSize: "13px", letterSpacing: "0.04em",
+          }}>
+            {lightboxIndex + 1} / {evidence.length}
+          </div>
+        </div>
+      )})()}
     </div>
   );
 };

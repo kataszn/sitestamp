@@ -11,6 +11,7 @@ export const VisitDetailPage: React.FC = () => {
   const [visit, setVisit] = useState<VisitDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/v1";
   const mediaBase = apiBase.replace(/\/v1\/?$/, "");
@@ -64,18 +65,14 @@ export const VisitDetailPage: React.FC = () => {
   const handleGenerateReport = async () => {
     if (!visit || visit.evidence.length === 0) return;
 
+    // Navigate immediately so user sees the generating view
+    navigate(`/visits/${id}/report`);
+
     setIsGenerating(true);
     try {
-      const response = await fetch(`${apiBase}/visits/${id}/report`, {
+      await fetch(`${apiBase}/visits/${id}/report`, {
         method: "POST",
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to generate report");
-      }
-
-      // Success, redirect to report view
-      navigate(`/visits/${id}/report`);
     } catch (err) {
       console.error(err);
       showToast("Failed to trigger report generation. Check if the AI models are configured.", "error");
@@ -151,64 +148,71 @@ export const VisitDetailPage: React.FC = () => {
               </p>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {visit.evidence.map((item) => (
-                  <div
-                    key={item.id}
-                    style={{
-                      display: "flex",
-                      gap: "12px",
-                      padding: "10px",
-                      border: "1.5px solid var(--ink)",
-                      alignItems: "center",
-                    }}
-                  >
-                    <img
-                      src={getMediaUrl(item.imageUrl)}
-                      alt={item.caption || "Evidence"}
-                      style={{ width: "60px", height: "60px", objectFit: "cover", border: "1px solid var(--line)" }}
-                    />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ margin: "0 0 4px", fontSize: "14px", fontWeight: "500" }}>
-                        {item.caption || <span style={{ color: "var(--steel)", fontStyle: "italic" }}>No caption</span>}
-                      </p>
-                      {item.caption && (
-                        <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "10.5px", color: "var(--steel)" }}>
-                          Source: {item.captionSource === "VOICE" ? "🎙️ Voice Transcription" : "📝 Text Input"}
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveEvidence(item.id)}
-                      title="Remove evidence"
+                {visit.evidence.map((item, idx) => (
+                  <div key={item.id}>
+                    <div
+                      onClick={() => setLightboxIndex(idx)}
                       style={{
-                        background: "none",
-                        border: "1.5px solid var(--critical)",
-                        color: "var(--critical)",
-                        cursor: "pointer",
-                        width: "32px",
-                        height: "32px",
                         display: "flex",
+                        gap: "12px",
+                        padding: "10px",
+                        border: "1.5px solid var(--ink)",
                         alignItems: "center",
-                        justifyContent: "center",
-                        fontFamily: "IBM Plex Mono, monospace",
-                        fontSize: "16px",
-                        fontWeight: "500",
-                        flexShrink: 0,
-                        lineHeight: 1,
-                        transition: "background 0.15s, color 0.15s",
-                      }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.background = "var(--critical)";
-                        (e.currentTarget as HTMLButtonElement).style.color = "#fff";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.background = "none";
-                        (e.currentTarget as HTMLButtonElement).style.color = "var(--critical)";
+                        cursor: "pointer",
+                        transition: "box-shadow 0.15s",
                       }}
                     >
-                      ×
-                    </button>
+                      <img
+                        src={getMediaUrl(item.imageUrl)}
+                        alt={item.caption || "Evidence"}
+                        style={{ width: "60px", height: "60px", objectFit: "cover", border: "1px solid var(--line)" }}
+                      />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ margin: "0 0 4px", fontSize: "14px", fontWeight: "500" }}>
+                          {item.caption || <span style={{ color: "var(--steel)", fontStyle: "italic" }}>No caption</span>}
+                        </p>
+                        {item.caption && (
+                          <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "10.5px", color: "var(--steel)" }}>
+                            Source: {item.captionSource === "VOICE" ? "🎙️ Voice" : "📝 Text"}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveEvidence(item.id);
+                        }}
+                        title="Remove evidence"
+                        style={{
+                          background: "none",
+                          border: "1.5px solid var(--critical)",
+                          color: "var(--critical)",
+                          cursor: "pointer",
+                          width: "32px",
+                          height: "32px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontFamily: "IBM Plex Mono, monospace",
+                          fontSize: "16px",
+                          fontWeight: "500",
+                          flexShrink: 0,
+                          lineHeight: 1,
+                          transition: "background 0.15s, color 0.15s",
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLButtonElement).style.background = "var(--critical)";
+                          (e.currentTarget as HTMLButtonElement).style.color = "#fff";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLButtonElement).style.background = "none";
+                          (e.currentTarget as HTMLButtonElement).style.color = "var(--critical)";
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -228,6 +232,166 @@ export const VisitDetailPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Lightbox */}
+      {lightboxIndex !== null && visit && (() => {
+        const item = visit.evidence[lightboxIndex];
+        if (!item) return null;
+        return (
+        <div
+          onClick={() => setLightboxIndex(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1000,
+            background: "rgba(0,0,0,0.85)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+          }}
+        >
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxIndex(
+                lightboxIndex === 0 ? visit.evidence.length - 1 : lightboxIndex - 1
+              );
+            }}
+            style={{
+              position: "absolute",
+              left: "20px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "rgba(255,255,255,0.15)",
+              border: "none",
+              color: "#fff",
+              fontSize: "32px",
+              width: "52px",
+              height: "52px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              borderRadius: "50%",
+              transition: "background 0.15s",
+              zIndex: 1001,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.3)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.15)")}
+          >
+            ←
+          </button>
+
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "16px",
+              maxWidth: "90vw",
+              maxHeight: "90vh",
+            }}
+          >
+            <img
+              src={getMediaUrl(item.imageUrl)}
+              alt={item.caption || "Evidence"}
+              style={{
+                maxWidth: "100%",
+                maxHeight: item.caption ? "75vh" : "85vh",
+                objectFit: "contain",
+                borderRadius: "4px",
+              }}
+            />
+            {item.caption && (
+              <p
+                style={{
+                  margin: 0,
+                  color: "#fff",
+                  fontSize: "15px",
+                  lineHeight: "1.5",
+                  textAlign: "center",
+                  maxWidth: "600px",
+                }}
+              >
+                {item.caption}
+              </p>
+            )}
+          </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightboxIndex(
+                lightboxIndex === visit.evidence.length - 1 ? 0 : lightboxIndex + 1
+              );
+            }}
+            style={{
+              position: "absolute",
+              right: "20px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "rgba(255,255,255,0.15)",
+              border: "none",
+              color: "#fff",
+              fontSize: "32px",
+              width: "52px",
+              height: "52px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              borderRadius: "50%",
+              transition: "background 0.15s",
+              zIndex: 1001,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.3)")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.15)")}
+          >
+            →
+          </button>
+
+          <button
+            onClick={() => setLightboxIndex(null)}
+            style={{
+              position: "absolute",
+              top: "16px",
+              right: "20px",
+              background: "none",
+              border: "none",
+              color: "#fff",
+              fontSize: "28px",
+              cursor: "pointer",
+              width: "44px",
+              height: "44px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1001,
+              fontFamily: "IBM Plex Mono, monospace",
+            }}
+          >
+            ×
+          </button>
+
+          {/* Counter */}
+          <div
+            style={{
+              position: "absolute",
+              bottom: "24px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              color: "rgba(255,255,255,0.6)",
+              fontFamily: "IBM Plex Mono, monospace",
+              fontSize: "13px",
+              letterSpacing: "0.04em",
+            }}
+          >
+            {lightboxIndex + 1} / {visit.evidence.length}
+          </div>
+        </div>
+      )})()}
     </div>
   );
 };

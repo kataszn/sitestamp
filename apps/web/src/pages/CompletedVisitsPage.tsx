@@ -28,59 +28,78 @@ export const CompletedVisitsPage: React.FC = () => {
     fetchVisits();
   }, [apiBase]);
 
+  if (loading) {
+    return (
+      <div className="report-page">
+        <div className="state-message">Loading completed visits...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="report-page">
-      <div className="sheet" style={{ padding: "40px 28px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "24px" }}>
-          <button
-            onClick={() => navigate("/")}
-            style={{
-              background: "none",
-              border: "1px solid var(--border)",
-              borderRadius: "6px",
-              padding: "6px 12px",
-              cursor: "pointer",
-              fontSize: "13px",
-              color: "var(--steel)",
-            }}
-          >
-            &larr; Back
-          </button>
-          <h1 style={{ fontFamily: "Space Grotesk, sans-serif", fontSize: "28px", margin: 0 }}>
-            Completed Visits
-          </h1>
+      <div className="sheet">
+        {/* Header */}
+        <div className="titleblock">
+          <div className="eyebrow">
+            <span>Inspection Records</span>
+            <span>{visits.length} complete</span>
+          </div>
+          <h1 className="site-name">Completed Visits</h1>
+          <div className="meta-row">
+            <button
+              onClick={() => navigate("/")}
+              className="btn-secondary"
+              style={{ fontSize: "11px", padding: "6px 12px" }}
+            >
+              &larr; Back
+            </button>
+          </div>
         </div>
 
-        {loading ? (
-          <p style={{ color: "var(--steel)", fontSize: "14px" }}>Loading...</p>
-        ) : visits.length === 0 ? (
-          <p style={{ color: "var(--steel)", fontSize: "14px" }}>No completed visits yet.</p>
+        {/* Visit list */}
+        {visits.length === 0 ? (
+          <div className="section">
+            <p style={{ color: "var(--steel)", fontSize: "14px", fontStyle: "italic", margin: 0 }}>
+              No completed visits yet.
+            </p>
+          </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div style={{ padding: "16px 28px 24px", display: "flex", flexDirection: "column", gap: "10px" }}>
             {visits.map((visit) => (
               <div
                 key={visit.id}
                 onClick={() => navigate(`/visits/${visit.id}/report`)}
+                className="card"
                 style={{
-                  border: "1px solid var(--border)",
-                  borderRadius: "8px",
-                  padding: "16px",
+                  margin: 0,
                   cursor: "pointer",
-                  transition: "box-shadow 0.15s",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: "16px",
+                  transition: "box-shadow 0.15s, transform 0.15s",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.08)")}
-                onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = "6px 6px 0 rgba(27,36,48,0.1)";
+                  e.currentTarget.style.transform = "translate(-1px, -1px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = "4px 4px 0 rgba(27,36,48,0.06)";
+                  e.currentTarget.style.transform = "none";
+                }}
               >
-                <div style={{ fontWeight: 600, fontSize: "16px", marginBottom: "4px" }}>
-                  {visit.siteName}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 600, fontSize: "16px", marginBottom: "4px" }}>
+                    {visit.siteName}
+                  </div>
+                  <div className="meta-row" style={{ gap: "12px", fontSize: "11.5px" }}>
+                    <span>Inspector: <b>{visit.inspectorName}</b></span>
+                    {visit.notes && <span>· {visit.notes}</span>}
+                    <span>· {new Date(visit.createdAt).toLocaleDateString()}</span>
+                  </div>
                 </div>
-                <div style={{ color: "var(--steel)", fontSize: "13px" }}>
-                  Inspector: {visit.inspectorName}
-                  {visit.notes && <span> &middot; {visit.notes}</span>}
-                </div>
-                <div style={{ color: "var(--steel)", fontSize: "12px", marginTop: "4px" }}>
-                  {new Date(visit.createdAt).toLocaleDateString()}
-                </div>
+                <span className="status-pill" style={{ flexShrink: 0 }}>Complete</span>
               </div>
             ))}
           </div>
