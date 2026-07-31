@@ -148,7 +148,7 @@ Instructions:
 - Keep defects separate when they occur on different structural elements or represent different damage.
 - The overall site severity should reflect the highest-risk condition affecting the structure.
 
-For each distinct defect visible across the photos, identify:
+For each distinct defect visible across the photos, with and without caption, identify:
 - type (e.g. crack, spalling, corrosion, drainage blockage, joint failure)
 - approximate location, based on captions/notes if given
 - severity: LOW, MODERATE, HIGH, or CRITICAL

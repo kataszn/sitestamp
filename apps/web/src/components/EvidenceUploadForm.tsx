@@ -1,10 +1,12 @@
 import React, { useState, useRef } from "react";
+import { useToast } from "./Toast";
 
 interface EvidenceUploadFormProps {
   onUpload: (formData: FormData) => Promise<void>;
 }
 
 export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload }) => {
+  const { showToast } = useToast();
   const [image, setImage] = useState<File | null>(null);
   const [captionMode, setCaptionMode] = useState<"text" | "audio">("text");
   const [textCaption, setTextCaption] = useState("");
@@ -66,7 +68,7 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
       }, 1000);
     } catch (err) {
       console.error("Failed to start audio recording", err);
-      alert("Microphone permission denied or device not supported.");
+      showToast("Microphone permission denied or device not supported.", "error");
     }
   };
 
@@ -109,9 +111,10 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
       setRecordingDuration(0);
       const fileInput = document.getElementById("evidenceImage") as HTMLInputElement;
       if (fileInput) fileInput.value = "";
+      showToast("Evidence uploaded successfully", "success");
     } catch (err) {
       console.error("Upload failed", err);
-      alert("Failed to upload evidence. Please try again.");
+      showToast("Failed to upload evidence. Please try again.", "error");
     } finally {
       setIsUploading(false);
     }

@@ -37,6 +37,15 @@ export const reportSchema = z.object({
   needsReview: z.boolean(),
 }).loose();
 
+export const updateStatus = z.object({
+  params: z.object({
+    id: z.cuid2(),
+  }),
+  body: z.object({
+    status: z.enum(['OPEN', 'COMPLETE']),
+  }),
+});
+
 export const idParam = z.object({
   params: z.object({
     id: z.cuid2(),

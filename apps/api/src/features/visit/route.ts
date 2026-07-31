@@ -11,12 +11,16 @@ import { AppError, Errors } from "../../core/errors";
 import { ENV } from "../../core/env";
 import { transcribeAudio } from "./gemma.client";
 
-
 const router: Router = Router({ mergeParams: true });
 
 router.post("/", route(validate.createVisit, async (req, res) => {
   const visit = await services.createVisit(req.body);
   res.status(201).json(visit);
+}));
+
+router.get("/", route(undefined, async (req, res) => {
+  const visits = await services.getAllVisits();
+  res.status(200).json(visits);
 }));
 
 router.post("/:id/evidence", evidenceUpload, route(validate.addEvidence, async (req, res) => {
@@ -68,6 +72,18 @@ router.post("/:id/report", route(validate.generateReport, async (req, res) => {
 router.get("/:id/report", route(validate.idParam, async (req, res) => {
   const report = await services.getReport(req.params.id);
   res.status(200).json(report);
+}));
+
+router.post("/:id/status", route(validate.updateStatus, async (req, res) => {
+  const { status } = req.body;
+  await services.updateVisitStatus(req.params.id, status);
+  res.status(200).json({ message: `Visit status updated to ${status}` });
+}));
+
+router.post("/evidence/:id/remove", route(validate.idParam, async (req, res) => {
+  const evidenceId = req.params.id;
+  await services.removeEvidence(evidenceId);
+  res.status(204).send();
 }));
 
 export default router;
@@ -229,4 +245,92 @@ export default router;
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ApiError'
+ *
+ * /visits/{id}/status:
+ *   post:
+ *     tags: [Visits]
+ *     summary: Update the status of a visit
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Visit CUID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [OPEN, COMPLETE]
+ *                 description: New status for the visit
+ *     responses:
+ *       200:
+ *         description: Status updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Visit status updated to COMPLETE
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *       404:
+ *         description: Visit not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *
+ * /visits/evidence/{id}/remove:
+ *   post:
+ *     tags: [Evidence]
+ *     summary: Remove an evidence item from a visit
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Evidence CUID
+ *     responses:
+ *       204:
+ *         description: Evidence removed successfully (no content)
+ *       404:
+ *         description: Evidence not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ApiError'
+ *
+ */
+
+/**
+ * @swagger
+ * /visits:
+ *   get:
+ *     tags: [Visits]
+ *     summary: List all visits
+ *     responses:
+ *       200:
+ *         description: A list of all visits
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/VisitDTO'
+ *
  */

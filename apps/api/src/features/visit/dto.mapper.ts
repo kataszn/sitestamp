@@ -13,13 +13,18 @@ const toEvidenceDTO = (evidence: PrismaVisit['evidence'][number]): EvidenceDTO =
   captionSource: evidence.captionSource as EvidenceDTO['captionSource'],
 });
 
-const toReportDTO = (report: NonNullable<PrismaVisit['report']>): ReportDTO => ({
-  summary: report.summary,
-  severity: report.severity as ReportDTO['severity'],
-  defects: report.defects as unknown as ReportDTO['defects'],
-  recommendation: report.recommendation,
-  needsReview: report.needsReview,
-});
+const toReportDTO = (report: NonNullable<PrismaVisit['report']>): ReportDTO => {
+  const defects = typeof report.defects === 'string'
+    ? JSON.parse(report.defects)
+    : report.defects;
+  return {
+    summary: report.summary,
+    severity: report.severity as ReportDTO['severity'],
+    defects: defects as ReportDTO['defects'],
+    recommendation: report.recommendation,
+    needsReview: report.needsReview,
+  };
+};
 
 const toVisitDTO = (visit: PrismaVisit): VisitDTO => ({
   id: visit.id,

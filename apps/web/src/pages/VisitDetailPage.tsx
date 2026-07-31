@@ -2,10 +2,12 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { VisitDTO } from "@inspection/shared";
 import EvidenceUploadForm from "../components/EvidenceUploadForm";
+import { useToast } from "../components/Toast";
 
 export const VisitDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [visit, setVisit] = useState<VisitDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -76,9 +78,23 @@ export const VisitDetailPage: React.FC = () => {
       navigate(`/visits/${id}/report`);
     } catch (err) {
       console.error(err);
-      alert("Failed to trigger report generation. Check if the AI models are configured.");
+      showToast("Failed to trigger report generation. Check if the AI models are configured.", "error");
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleRemoveEvidence = async (evidenceId: string) => {
+    try {
+      const response = await fetch(`${apiBase}/visits/evidence/${evidenceId}/remove`, {
+        method: "POST",
+      });
+      if (!response.ok) {
+        throw new Error("Failed to remove evidence");
+      }
+      await fetchVisit();
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -155,10 +171,44 @@ export const VisitDetailPage: React.FC = () => {
                       <p style={{ margin: "0 0 4px", fontSize: "14px", fontWeight: "500" }}>
                         {item.caption || <span style={{ color: "var(--steel)", fontStyle: "italic" }}>No caption</span>}
                       </p>
-                      <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "10.5px", color: "var(--steel)" }}>
-                        Source: {item.captionSource === "VOICE" ? "🎙️ Voice Transcription" : "📝 Text Input"}
-                      </div>
+                      {item.caption && (
+                        <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "10.5px", color: "var(--steel)" }}>
+                          Source: {item.captionSource === "VOICE" ? "🎙️ Voice Transcription" : "📝 Text Input"}
+                        </div>
+                      )}
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveEvidence(item.id)}
+                      title="Remove evidence"
+                      style={{
+                        background: "none",
+                        border: "1.5px solid var(--critical)",
+                        color: "var(--critical)",
+                        cursor: "pointer",
+                        width: "32px",
+                        height: "32px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontFamily: "IBM Plex Mono, monospace",
+                        fontSize: "16px",
+                        fontWeight: "500",
+                        flexShrink: 0,
+                        lineHeight: 1,
+                        transition: "background 0.15s, color 0.15s",
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLButtonElement).style.background = "var(--critical)";
+                        (e.currentTarget as HTMLButtonElement).style.color = "#fff";
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLButtonElement).style.background = "none";
+                        (e.currentTarget as HTMLButtonElement).style.color = "var(--critical)";
+                      }}
+                    >
+                      ×
+                    </button>
                   </div>
                 ))}
               </div>
@@ -174,7 +224,7 @@ export const VisitDetailPage: React.FC = () => {
             style={{ width: "100%", fontSize: "14px", padding: "12px" }}
             disabled={visit.evidence.length === 0 || isGenerating}
           >
-            {isGenerating ? "Generating Report (this may take up to 60s)..." : "Generate AI Defect Report 🔍"}
+            {isGenerating ? "Generating Report (may take up to 60s)..." : "Generate Inspection Report 🔍"}
           </button>
         </div>
       </div>

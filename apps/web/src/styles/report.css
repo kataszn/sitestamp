@@ -28,10 +28,34 @@ body {
   font-family: 'Source Serif 4', serif;
 }
 
+/* Toast animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
 .report-page {
   padding: 40px 20px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 .sheet {
@@ -307,12 +331,40 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .footer-note {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 10.5px;
   color: var(--steel);
+}
+
+.footer-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.regenerate-btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--blueprint);
+  border: 1px solid var(--blueprint);
+  padding: 9px 16px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.regenerate-btn:hover {
+  background: var(--blueprint-soft);
+}
+.regenerate-btn:focus-visible {
+  outline: 2px solid var(--blueprint);
+  outline-offset: 2px;
 }
 
 .export-btn {
@@ -375,6 +427,23 @@ body {
 }
 .btn:hover:not(:disabled) { background: var(--ink); }
 .btn:disabled { background: var(--line); color: var(--steel); cursor: not-allowed; }
+
+.btn-secondary {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--blueprint-soft);
+  color: var(--blueprint);
+  border: 1.5px solid var(--blueprint);
+  padding: 8px 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-secondary:hover { background: var(--line); }
 
 .form-group {
   margin-bottom: 16px;

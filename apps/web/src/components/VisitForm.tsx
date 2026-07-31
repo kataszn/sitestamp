@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface VisitFormProps {
   onSubmit: (data: { siteName: string; inspectorName: string; notes: string }) => void;
@@ -6,6 +7,7 @@ interface VisitFormProps {
 }
 
 export const VisitForm: React.FC<VisitFormProps> = ({ onSubmit, isLoading }) => {
+  const navigate = useNavigate();
   const [siteName, setSiteName] = useState("");
   const [inspectorName, setInspectorName] = useState("");
   const [notes, setNotes] = useState("");
@@ -59,9 +61,14 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSubmit, isLoading }) => 
         />
       </div>
 
-      <button type="submit" className="btn" disabled={isLoading || !siteName.trim() || !inspectorName.trim()}>
-        {isLoading ? "Starting Visit..." : "Start Visit"}
-      </button>
+      <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+        <button type="submit" className="btn" disabled={isLoading || !siteName.trim() || !inspectorName.trim()}>
+          {isLoading ? "Starting Visit..." : "Start Visit"}
+        </button>
+        <button type="button" className="btn-secondary" onClick={() => navigate("/visits/completed")}>
+          View Completed Visits
+        </button>
+      </div>
     </form>
   );
 };

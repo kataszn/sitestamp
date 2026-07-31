@@ -71,7 +71,7 @@ export const ReportPage: React.FC = () => {
     );
   }
 
-  if (visit.status === "OPEN" || !visit.report) {
+  if (!visit.report) {
     return (
       <div className="report-page">
         <div className="sheet" style={{ padding: "60px 20px", textAlign: "center" }}>

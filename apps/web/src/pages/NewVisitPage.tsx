@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import VisitForm from "../components/VisitForm";
+import { useToast } from "../components/Toast";
 
 export const NewVisitPage: React.FC = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleCreateVisit = async (data: { siteName: string; inspectorName: string; notes: string }) => {
@@ -27,7 +29,7 @@ export const NewVisitPage: React.FC = () => {
       navigate(`/visits/${visit.id}`);
     } catch (err) {
       console.error(err);
-      alert("Error starting new visit. Is the API server running?");
+      showToast("Error starting new visit. Is the API server running?", "error");
     } finally {
       setIsLoading(false);
     }

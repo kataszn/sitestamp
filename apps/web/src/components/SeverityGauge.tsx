@@ -10,7 +10,7 @@ const LEVELS: Severity[] = ["LOW", "MODERATE", "HIGH", "CRITICAL"];
 export const SeverityGauge: React.FC<SeverityGaugeProps> = ({ severity }) => {
   return (
     <div className="gauge-section">
-      <div className="gauge-label">Overall Severity Rating</div>
+      <div className="gauge-label">Overall Severity</div>
       <div className="gauge">
         {LEVELS.map((level) => {
           const isActive = level === severity;

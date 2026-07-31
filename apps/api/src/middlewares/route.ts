@@ -19,18 +19,27 @@ type InferRequest<T extends z.ZodType> = z.infer<T> extends {
  * 
  */
 export function route<T extends z.ZodType>(
-  schema: T,
+  schema: T | undefined,
   handler: (req: InferRequest<T>, res: Response) => Promise<void>
 ): RequestHandler {
   return async (req, res, next) => {
+    if (!schema) {
+      try {
+        await handler(req as InferRequest<T>, res);
+      } catch (err) {
+        next(err);
+      }
+      return;
+    }
+
     const result = schema.safeParse({
       body: req.body,
       params: req.params,
       query: req.query,
     });
 
-    if (!result.success) {
-      return next(result.error);
+    if (!result?.success) {
+      return next(result?.error);
     }
 
     Object.assign(req, result.data);

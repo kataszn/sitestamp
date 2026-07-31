@@ -14,7 +14,7 @@ import fs from "node:fs";
 import { ENV } from "../../core/env";
 
 const createVisit = async (input: CreateVisitInput): Promise<VisitDTO> => {
-  const visit = await CTX.repo.visit.createVisit(input);
+  const visit = await CTX.repo.visit.create(input);
   return mapper.toVisitDTO(visit);
 };
 
@@ -27,7 +27,7 @@ const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO> => {
 };
 
 const getVisit = async (visitId: string): Promise<VisitDTO> => {
-  const visit = await CTX.repo.visit.getVisit(visitId);
+  const visit = await CTX.repo.visit.find(visitId);
   if (!visit) {
     throw new AppError(Errors.NOT_FOUND, { message: "Visit not found" });
   }
@@ -36,6 +36,7 @@ const getVisit = async (visitId: string): Promise<VisitDTO> => {
 
 const generateReport = async (visitId: string): Promise<ReportDTO> => {
   const visit = await getVisit(visitId);
+  await CTX.repo.visit.updateStatus(visitId, 'GENERATING');
 
   const evidenceInputs = await Promise.all(
     visit.evidence.map(async (e) => {
@@ -57,6 +58,8 @@ const generateReport = async (visitId: string): Promise<ReportDTO> => {
   );
 
   await CTX.repo.visit.saveReport({ visitId, ...report, rawModelJson: raw });
+  await CTX.repo.visit.updateStatus(visitId, 'COMPLETE');
+
   return report;
 };
 
@@ -68,8 +71,20 @@ const getReport = async (visitId: string): Promise<ReportDTO> => {
       message: `Report not found. Generate one first.`,
     });
   }
-  report.defects = JSON.parse(report.defects as unknown as string);
   return report;
 };
 
-export { createVisit, addEvidence, getVisit, generateReport, getReport };
+const updateVisitStatus = async (visitId: string, status: 'OPEN' | 'COMPLETE') => {
+  await CTX.repo.visit.updateStatus(visitId, status);
+};
+
+const removeEvidence = async (evidenceId: string) => {
+  await CTX.repo.visit.removeEvidence(evidenceId);
+};
+
+const getAllVisits = async (): Promise<VisitDTO[]> => {
+  const visits = await CTX.repo.visit.findAll();
+  return visits.map(mapper.toVisitDTO);
+}
+
+export { createVisit, addEvidence, getVisit, generateReport, getReport, updateVisitStatus, removeEvidence, getAllVisits };
