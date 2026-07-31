@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { VisitDTO } from "@inspection/shared";
+import { VisitDTO } from "@inspectai/shared";
 
 export const CompletedVisitsPage: React.FC = () => {
   const navigate = useNavigate();

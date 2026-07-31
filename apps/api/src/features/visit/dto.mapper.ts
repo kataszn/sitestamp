@@ -1,5 +1,5 @@
 import type { Prisma } from "@prisma/client";
-import { EvidenceDTO, VisitDTO, ReportDTO } from "@inspection/shared";
+import { EvidenceDTO, VisitDTO, ReportDTO } from "@inspectai/shared";
 
 type PrismaVisit = Prisma.VisitGetPayload<{
   include: { evidence: true; report: true }

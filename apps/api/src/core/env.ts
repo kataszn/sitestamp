@@ -10,11 +10,11 @@ const envSchema = z.object({
     .default("development"),
   PORT: z.coerce.number().default(8000),
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
-  SERVICE_NAME: z.string().default("inspection-ai-api"),
+  SERVICE_NAME: z.string().default("inspectai-api"),
 
   DATABASE_URL: z.string(),
   CORS_ORIGIN: z.string().default("http://localhost:3000"),
-  GEMINI_API_KEY: z.string(),
+  GOOGLE_API_KEY: z.string(),
   TRANSCRIBE_MODEL: z.string(),
   GENERATE_MODEL: z.string(),
 });

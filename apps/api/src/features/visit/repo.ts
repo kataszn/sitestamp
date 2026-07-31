@@ -1,4 +1,4 @@
-import { CreateVisitInput, AddEvidenceInput, SaveReportInput } from "@inspection/shared";
+import { CreateVisitInput, AddEvidenceInput, SaveReportInput } from "@inspectai/shared";
 import { PrismaClient } from '@prisma/client';
 import { isPrismaNotFound, PrismaClientError } from '../../utils/prisma';
 

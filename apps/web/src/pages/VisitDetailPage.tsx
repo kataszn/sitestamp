@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { VisitDTO } from "@inspection/shared";
+import { VisitDTO } from "@inspectai/shared";
 import EvidenceUploadForm from "../components/EvidenceUploadForm";
 import { useToast } from "../components/Toast";
 

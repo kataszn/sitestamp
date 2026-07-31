@@ -1,9 +1,9 @@
 import { GoogleGenAI, Type, ApiError } from '@google/genai';
-import { validate, type ReportDTO } from '@inspection/shared';
+import { validate, type ReportDTO } from '@inspectai/shared';
 import { ENV } from '../../core/env';
 import { AppError, Errors } from '../../core/errors';
 
-const ai = new GoogleGenAI({ apiKey: ENV.GEMINI_API_KEY });
+const ai = new GoogleGenAI({ apiKey: ENV.GOOGLE_API_KEY });
 
 export async function transcribeAudio(
   buffer: Buffer,

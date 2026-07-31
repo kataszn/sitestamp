@@ -1,5 +1,5 @@
 import React from "react";
-import { DefectData } from "@inspection/shared";
+import { DefectData } from "@inspectai/shared";
 
 interface DefectItemProps {
   defect: DefectData;

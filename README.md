@@ -1,4 +1,4 @@
-# Inspection AI 🔍
+# InspectAI 🔍
 
 > AI-powered inspection report generation — built for a hackathon.
 

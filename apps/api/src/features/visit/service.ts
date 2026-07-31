@@ -5,7 +5,7 @@ import type {
   EvidenceDTO,
   ReportDTO,
   DefectData,
-} from "@inspection/shared";
+} from "@inspectai/shared";
 import { CTX } from "../../core/app-context";
 import { AppError, Errors } from "../../core/errors";
 import * as mapper from "./dto.mapper";

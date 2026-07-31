@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import { VisitDTO } from "@inspection/shared";
+import { VisitDTO } from "@inspectai/shared";
 import ReportView from "../components/ReportView";
 
 export const ReportPage: React.FC = () => {

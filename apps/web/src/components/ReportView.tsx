@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { VisitDTO } from "@inspection/shared";
+import { VisitDTO } from "@inspectai/shared";
 import SeverityGauge from "./SeverityGauge";
 import DefectItem from "./DefectItem";
 
@@ -76,7 +76,7 @@ export const ReportView: React.FC<ReportViewProps> = ({ visit }) => {
       {/* 2. Title block */}
       <div className="titleblock">
         <div className="eyebrow">
-          <span>Inspection AI · Field Inspection Report</span>
+          <span>InspectAI · Field Inspection Report</span>
           <span>Visit #{id}</span>
         </div>
         <h1 className="site-name">{siteName}</h1>

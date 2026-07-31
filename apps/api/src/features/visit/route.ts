@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto';
 
 import route from "../../middlewares/route";
 import * as services from "./service";
-import { validate, CaptionSource } from "@inspection/shared";
+import { validate, CaptionSource } from "@inspectai/shared";
 import { evidenceUpload } from "../../middlewares/upload";
 import { AppError, Errors } from "../../core/errors";
 import { ENV } from "../../core/env";

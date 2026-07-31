@@ -1,5 +1,5 @@
 import React from "react";
-import { Severity } from "@inspection/shared";
+import { Severity } from "@inspectai/shared";
 
 interface SeverityGaugeProps {
   severity: Severity;
