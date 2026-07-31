@@ -6,6 +6,7 @@ export interface VisitDTO {
   inspectorName: string;
   notes: string | null;
   status: 'OPEN' | 'GENERATING' | 'COMPLETE';
+  createdAt: string;
   evidence: EvidenceDTO[];
   report: ReportDTO | null;
 }
