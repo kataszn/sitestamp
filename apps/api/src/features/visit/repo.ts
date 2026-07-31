@@ -1,4 +1,4 @@
-import { CreateVisitInput, AddEvidenceInput } from "@inspection/shared";
+import { CreateVisitInput, AddEvidenceInput, SaveReportInput } from "@inspection/shared";
 import { PrismaClient } from '@prisma/client';
 import { isPrismaNotFound, PrismaClientError } from '../../utils/prisma';
 
@@ -27,6 +27,7 @@ export class VisitRepository {
           evidence: {
             create: {
               imageUrl: input.imageUrl,
+              mimeType: input.mimeType,
               caption: input.caption,
               captionSource: input.captionSource ?? 'TEXT',
             },
@@ -55,5 +56,30 @@ export class VisitRepository {
         report: true,
       },
     });
+  }
+
+  async saveReport(input: SaveReportInput) {
+  return this.db.report.upsert({
+    where: {
+      visitId: input.visitId,
+    },
+    create: {
+      visitId: input.visitId,
+      summary: input.summary,
+      severity: input.severity,
+      defects: JSON.stringify(input.defects),
+      recommendation: input.recommendation,
+      needsReview: input.needsReview ?? false,
+      rawModelJson: input.rawModelJson,
+    },
+    update: {
+      summary: input.summary,
+      severity: input.severity,
+      defects: JSON.stringify(input.defects),
+      recommendation: input.recommendation,
+      needsReview: input.needsReview ?? false,
+      rawModelJson: input.rawModelJson,
+    },
+  });
   }
 }

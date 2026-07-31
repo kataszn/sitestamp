@@ -13,6 +13,7 @@ export interface VisitDTO {
 export interface EvidenceDTO {
   id: string;
   imageUrl: string;
+  mimeType: string;
   caption: string | null;
   captionSource: CaptionSource | null;
 }
@@ -28,6 +29,7 @@ export interface CreateVisitInput {
 export interface AddEvidenceInput {
   visitId: string;
   imageUrl: string; // already-uploaded URL; keep upload separate from this call
+  mimeType: string; 
   caption?: string;
   captionSource?: CaptionSource;
 }

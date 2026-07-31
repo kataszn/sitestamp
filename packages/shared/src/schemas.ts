@@ -35,7 +35,7 @@ export const reportSchema = z.object({
   })),
   recommendation: z.string().min(1, { message: 'Recommendation is required' }),
   needsReview: z.boolean(),
-});
+}).loose();
 
 export const idParam = z.object({
   params: z.object({

@@ -1,48 +1,92 @@
-// infra/gemma.client.ts
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI, Type, ApiError } from '@google/genai';
 import { validate, type ReportDTO } from '@inspection/shared';
 import { ENV } from '../../core/env';
+import { AppError, Errors } from '../../core/errors';
 
 const ai = new GoogleGenAI({ apiKey: ENV.GEMINI_API_KEY });
-const MODEL = 'gemma-4-31b-it';
 
-// ---------------------------------------------------------------------------
-// Transcription — one audio clip in, one caption string out.
-// ---------------------------------------------------------------------------
+export async function transcribeAudio(
+  buffer: Buffer,
+  mimeType: string
+): Promise<string> {
+  try {
+    const response = await ai.models.generateContent({
+      model: ENV.TRANSCRIBE_MODEL,
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: 'Transcribe this audio clip. The speaker is a field inspector describing a site defect. Return only the transcript text, cleaned up into a single sentence or two — no filler words, no "um"s, no preamble.',
+            },
+            {
+              inlineData: {
+                mimeType,
+                data: buffer.toString("base64"),
+              },
+            },
+          ],
+        },
+      ],
+    });
 
-export async function transcribeAudio(buffer: Buffer, mimeType: string): Promise<string> {
+    const text = response.text?.trim();
+    if (!text) {
+      throw new AppError(Errors.EMPTY_MODEL_RESPONSE);
+    }
+    return text;
+  } catch (err) {
+    if (err instanceof AppError) {
+      throw err;
+    }
+    if (err instanceof ApiError) {
+      throw new AppError(Errors.TRANSCRIPTION_FAILED, { message: err.message });
+    }
+    throw new AppError(Errors.TRANSCRIPTION_FAILED);
+  }
+}
+
+export async function generateReport(
+  siteName: string,
+  notes: string | null,
+  evidence: EvidenceInput[]
+): Promise<{ report: ReportDTO; raw: string }> {
+  const prompt = buildInspectionPrompt(
+    siteName,
+    notes,
+    evidence.map((e) => ({ caption: e.caption }))
+  );
+
   const response = await ai.models.generateContent({
-    model: MODEL,
+    model: ENV.GENERATE_MODEL,
     contents: [
       {
         role: 'user',
         parts: [
-          {
-            text: 'Transcribe this audio clip. The speaker is a field inspector describing a site defect. Return only the transcript text, cleaned up into a single sentence or two — no filler words, no "um"s, no preamble.',
-          },
-          {
+          { text: prompt },
+          ...evidence.map((e) => ({
             inlineData: {
-              mimeType,
-              data: buffer.toString('base64'),
+              mimeType: e.mimeType,
+              data: e.imageBuffer.toString('base64'),
             },
-          },
+          })),
         ],
       },
     ],
+    config: {
+      responseMimeType: 'application/json',
+      responseSchema: GEMMA_REPORT_SCHEMA,
+    },
   });
 
-  const text = response.text?.trim();
-  if (!text) {
-    throw new Error('Gemma returned an empty transcription');
+  const raw = response.text;
+  if (!raw) {
+    throw new AppError(Errors.EMPTY_MODEL_RESPONSE);
   }
-  return text;
-}
 
-// ---------------------------------------------------------------------------
-// Report generation — evidence (images + captions) in, structured report out.
-// Uses responseSchema so Gemma is constrained to valid JSON at the API level,
-// then we still run it through zod as a second, independent check.
-// ---------------------------------------------------------------------------
+  const parsed = JSON.parse(raw);
+  return { report: validate.reportSchema.parse(parsed), raw };
+}
 
 interface EvidenceInput {
   imageBuffer: Buffer;
@@ -74,63 +118,35 @@ const GEMMA_REPORT_SCHEMA = {
   required: ['summary', 'severity', 'defects', 'recommendation', 'needsReview'],
 };
 
-export async function generateReport(
-  siteName: string,
-  notes: string | null,
-  evidence: EvidenceInput[]
-): Promise<ReportDTO> {
-  const prompt = buildInspectionPrompt(
-    siteName,
-    notes,
-    evidence.map((e) => ({ caption: e.caption }))
-  );
-
-  const response = await ai.models.generateContent({
-    model: MODEL,
-    contents: [
-      {
-        role: 'user',
-        parts: [
-          { text: prompt },
-          ...evidence.map((e) => ({
-            inlineData: {
-              mimeType: e.mimeType,
-              data: e.imageBuffer.toString('base64'),
-            },
-          })),
-        ],
-      },
-    ],
-    config: {
-      responseMimeType: 'application/json',
-      responseSchema: GEMMA_REPORT_SCHEMA,
-    },
-  });
-
-  const raw = response.text;
-  if (!raw) {
-    throw new Error('Gemma returned an empty report response');
-  }
-
-  const parsed = JSON.parse(raw);
-  return validate.reportSchema.parse(parsed);
-}
-
-
 export function buildInspectionPrompt(
   siteName: string,
   notes: string | null,
   evidence: { caption: string | null }[]
 ) {
-  return `You are a civil engineering inspection assistant. You are given
+  return `You are an experienced civil and structural engineering inspection assistant.
+  
+You are given
 ${evidence.length} photo(s) from a field site visit and optional notes.
-Analyze the evidence as a qualified inspector would.
+Analyze the supplied inspection evidence and prepare a professional infrastructure inspection report.
 
 Site: ${siteName}
 Inspector notes: ${notes ?? "none provided"}
-Photo captions (in order): ${evidence
-    .map((e, i) => `${i + 1}. ${e.caption ?? "no caption"}`)
-    .join("; ")}
+Inspection evidence (in order): ${evidence
+    .map((e, i) => {
+      const caption = e.caption ? `"${e.caption}"` : "no caption";
+      return JSON.stringify({ index: i + 1, caption });
+    })
+    .join(", ")}
+
+Instructions:
+
+- Consider all inspection evidence together before reaching conclusions.
+- Base conclusions only on the supplied images, captions and inspector notes.
+- Do not speculate about defects that are not reasonably supported by the evidence.
+- Use professional civil engineering terminology.
+- Merge observations that clearly refer to the same physical defect viewed from multiple angles or distances.
+- Keep defects separate when they occur on different structural elements or represent different damage.
+- The overall site severity should reflect the highest-risk condition affecting the structure.
 
 For each distinct defect visible across the photos, identify:
 - type (e.g. crack, spalling, corrosion, drainage blockage, joint failure)

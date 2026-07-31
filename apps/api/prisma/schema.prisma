@@ -14,6 +14,7 @@ model Visit {
   notes         String?
   status        VisitStatus @default(OPEN)
   createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 
   evidence Evidence[]
   report   Report?
@@ -30,6 +31,7 @@ model Evidence {
   visitId       String
   visit         Visit         @relation(fields: [visitId], references: [id])
   imageUrl      String
+  mimeType      String
   caption       String? // final text, if captionSource is AUDIO, this is the transcript
   captionSource CaptionSource @default(TEXT)
   audioUrl      String? // kept for reference/playback, not sent to Gemma again
@@ -50,8 +52,9 @@ model Report {
   defects        Json // DefectData[]
   recommendation String
   needsReview    Boolean  @default(false)
-  rawModelJson   Json // full Gemma response, kept for debugging/demo trust
+  rawModelJson   Json // full Gemma response
   createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 enum Severity {

@@ -52,5 +52,17 @@ export const Errors = {
     message: "Bad request.",
     httpStatus: 400,
     category: "business",
-  }
+  },
+  EMPTY_MODEL_RESPONSE: {
+    code: "EMPTY_MODEL_RESPONSE",
+    message: "The model returned an empty response.",
+    httpStatus: 502,
+    category: "system",
+  },
+  TRANSCRIPTION_FAILED: {
+    code: "TRANSCRIPTION_FAILED",
+    message: "Failed to transcribe audio.",
+    httpStatus: 500,
+    category: "system",
+  },
 } as const;

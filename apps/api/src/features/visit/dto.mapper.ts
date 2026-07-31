@@ -8,6 +8,7 @@ type PrismaVisit = Prisma.VisitGetPayload<{
 const toEvidenceDTO = (evidence: PrismaVisit['evidence'][number]): EvidenceDTO => ({
   id: evidence.id,
   imageUrl: evidence.imageUrl,
+  mimeType: evidence.mimeType,
   caption: evidence.caption,
   captionSource: evidence.captionSource as EvidenceDTO['captionSource'],
 });

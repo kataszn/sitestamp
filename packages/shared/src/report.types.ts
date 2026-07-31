@@ -13,4 +13,14 @@ export interface ReportDTO {
   needsReview: boolean;
 }
 
+export type SaveReportInput = {
+  visitId: string;
+  summary: string;
+  severity: Severity;
+  defects: DefectData[];
+  recommendation: string;
+  needsReview: boolean;
+  rawModelJson: string;
+};
+
 export type Severity = 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';

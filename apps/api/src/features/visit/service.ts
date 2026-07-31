@@ -8,7 +8,10 @@ import type {
 import { CTX } from "../../core/app-context";
 import { AppError, Errors } from "../../core/errors";
 import * as mapper from "./dto.mapper";
-
+import * as gemma from "./gemma.client";
+import path from "node:path";
+import fs from "node:fs";
+import { ENV } from "../../core/env";
 
 const createVisit = async (input: CreateVisitInput): Promise<VisitDTO> => {
   const visit = await CTX.repo.visit.createVisit(input);
@@ -18,7 +21,7 @@ const createVisit = async (input: CreateVisitInput): Promise<VisitDTO> => {
 const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO> => {
   const evidence = await CTX.repo.visit.addEvidence(input);
   if (!evidence) {
-    throw new AppError(Errors.NOT_FOUND, { message: 'Visit not found' });
+    throw new AppError(Errors.NOT_FOUND, { message: "Visit not found" });
   }
   return mapper.toEvidenceDTO(evidence);
 };
@@ -26,28 +29,47 @@ const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO> => {
 const getVisit = async (visitId: string): Promise<VisitDTO> => {
   const visit = await CTX.repo.visit.getVisit(visitId);
   if (!visit) {
-    throw new AppError(Errors.NOT_FOUND, { message: 'Visit not found' });
+    throw new AppError(Errors.NOT_FOUND, { message: "Visit not found" });
   }
   return mapper.toVisitDTO(visit);
 };
 
 const generateReport = async (visitId: string): Promise<ReportDTO> => {
-  throw new Error("Not implemented");
+  const visit = await getVisit(visitId);
+
+  const evidenceInputs = await Promise.all(
+    visit.evidence.map(async (e) => {
+      const filename = path.basename(e.imageUrl);
+      const imageBuffer = fs.readFileSync(path.join(ENV.UPLOAD_DIR, filename));
+
+      return {
+        imageBuffer,
+        mimeType: e.mimeType,
+        caption: e.caption,
+      };
+    })
+  );
+
+  const { report, raw } = await gemma.generateReport(
+    visit.siteName,
+    visit.notes,
+    evidenceInputs
+  );
+
+  await CTX.repo.visit.saveReport({ visitId, ...report, rawModelJson: raw });
+  return report;
 };
 
 const getReport = async (visitId: string): Promise<ReportDTO> => {
   const visit = await getVisit(visitId);
   const report = visit.report;
   if (!report) {
-    throw new AppError(Errors.NOT_FOUND, { message: `Report not found. Generate one first.` });
+    throw new AppError(Errors.NOT_FOUND, {
+      message: `Report not found. Generate one first.`,
+    });
   }
+  report.defects = JSON.parse(report.defects as unknown as string);
   return report;
 };
 
-export {
-  createVisit,
-  addEvidence,
-  getVisit,
-  generateReport,
-  getReport,
-};
+export { createVisit, addEvidence, getVisit, generateReport, getReport };
