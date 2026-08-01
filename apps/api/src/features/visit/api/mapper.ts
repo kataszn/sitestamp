@@ -1,5 +1,5 @@
 import { EvidenceDTO, VisitDTO, ReportDTO } from "@inspectai/shared";
-import { Evidence, Report, Visit } from "../model";
+import { Evidence, Report, Visit } from "../domain/model";
 
 const toEvidenceDTO = (evidence: Evidence): EvidenceDTO => ({
   id: evidence.id,

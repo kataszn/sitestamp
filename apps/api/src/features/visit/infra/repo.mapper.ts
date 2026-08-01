@@ -1,5 +1,5 @@
 import { normalizeRecord } from "../../../utils/normalize-record";
-import { Defect, Evidence, Report, Visit } from "../model";
+import { Defect, Evidence, Report, Visit } from "../domain/model";
 
 export function toDomainEvidence(record: any): Evidence {
   const normalized = normalizeRecord(record);
@@ -10,9 +10,7 @@ export function toDomainEvidence(record: any): Evidence {
     imageUrl: String(normalized.imageUrl),
     mimeType: String(normalized.mimeType),
     caption: normalized.caption ?? null,
-    audioUrl: normalized.audioUrl ?? null,
     captionSource: normalized.captionSource ?? null,
-    createdAt: normalized.createdAt instanceof Date ? normalized.createdAt : new Date(normalized.createdAt),
   };
 }
 

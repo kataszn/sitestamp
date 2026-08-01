@@ -2,7 +2,7 @@ import { CreateVisitInput, AddEvidenceInput, SaveReportInput } from "@inspectai/
 import { isPrismaNotFound, PrismaClientError } from '../../../utils/prisma';
 
 import { DB } from "../../../core/db";
-import { Evidence, Report, Visit } from "../model";
+import { Evidence, Report, Visit } from "../domain/model";
 import * as mapper from "./repo.mapper";
 
 export async function create(input: CreateVisitInput): Promise<Visit> {
