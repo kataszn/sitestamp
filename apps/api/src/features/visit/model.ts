@@ -7,7 +7,7 @@ export interface Visit {
   notes: string | null;
   status: 'OPEN' | 'GENERATING' | 'COMPLETE';
   evidence: Evidence[];
-  report: Report | null;
+  report?: Report | null;
 
   createdAt: Date;
 }
@@ -40,7 +40,5 @@ export interface Evidence {
   imageUrl: string;
   mimeType: string;
   caption: string | null;
-  audioUrl: string | null;
   captionSource: 'TEXT' | 'VOICE' | null;
-  createdAt: Date;
 }

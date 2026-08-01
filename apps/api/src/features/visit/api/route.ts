@@ -22,8 +22,6 @@ router.get("/:id", validate(schema.idParam), handlers.getVisit);
 
 router.post("/:id/report", validate(schema.generateReport), handlers.generateReport);
 
-router.get("/:id/report/stream", handlers.streamReportProgress);
-
 router.get("/:id/report", validate(schema.idParam), handlers.getReport);
 
 router.post("/:id/status", validate(schema.updateStatus), handlers.updateStatus);

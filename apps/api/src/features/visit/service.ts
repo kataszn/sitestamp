@@ -35,12 +35,9 @@ export const getVisit = async (visitId: string): Promise<VisitDTO> => {
   return mapper.toVisitDTO(visit);
 };
 
-export const generateReport = async (
-  visitId: string,
-  onChunk?: (chunk: string) => void
-): Promise<ReportDTO> => {
+export const generateReport = async (visitId: string): Promise<ReportDTO> => {
   const visit = await getVisit(visitId);
-  await repo.updateStatus(visitId, 'GENERATING');
+  await repo.updateStatus(visitId, "GENERATING");
 
   const evidenceInputs = await Promise.all(
     visit.evidence.map(async (e) => {
@@ -58,15 +55,18 @@ export const generateReport = async (
   const { report, raw } = await gemma.generateReport(
     visit.siteName,
     visit.notes,
-    evidenceInputs,
-    onChunk
+    evidenceInputs
   );
 
   const resolved = resolveEvidenceIds(report.defects, visit.evidence);
   report.defects = resolved;
 
-  const saved = await repo.saveReport({ visitId, ...report, rawModelJson: raw });
-  await repo.updateStatus(visitId, 'COMPLETE');
+  const saved = await repo.saveReport({
+    visitId,
+    ...report,
+    rawModelJson: raw,
+  });
+  await repo.updateStatus(visitId, "COMPLETE");
 
   return mapper.toReportDTO(saved);
 };
