@@ -32,7 +32,7 @@ export async function transcribeAudio(
 
     const text = response.text?.trim();
     if (!text) {
-      throw new AppError(Errors.EMPTY_MODEL_RESPONSE);
+      throw new AppError(Errors.GENERATION_FAILED, { message: "The model returned an empty response." });
     }
     return text;
   } catch (err) {
@@ -40,9 +40,9 @@ export async function transcribeAudio(
       throw err;
     }
     if (err instanceof ApiError) {
-      throw new AppError(Errors.TRANSCRIPTION_FAILED, { message: err.message });
+      throw new AppError(Errors.GENERATION_FAILED, { message: err.message });
     }
-    throw new AppError(Errors.TRANSCRIPTION_FAILED);
+    throw new AppError(Errors.GENERATION_FAILED);
   }
 }
 
@@ -89,7 +89,7 @@ export async function generateReport(
   }
 
   if (!raw) {
-    throw new AppError(Errors.EMPTY_MODEL_RESPONSE);
+    throw new AppError(Errors.GENERATION_FAILED, { message: "The model returned an empty response." });
   }
 
   const parsed = JSON.parse(raw);

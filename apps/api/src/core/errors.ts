@@ -19,7 +19,7 @@ export interface ErrorDefinition {
   readonly code: ErrorCode;
   readonly message: string;
   readonly httpStatus: number;
-  readonly category: "system" | "validation" | "business";
+  readonly category: "system" | "validation" | "external";
 }
 
 export interface AppErrorOptions {
@@ -39,7 +39,7 @@ export const Errors = {
     code: "NOT_FOUND",
     message: "The requested resource was not found.",
     httpStatus: 404,
-    category: "business",
+    category: "validation",
   },
   VALIDATION: {
     code: "VALIDATION",
@@ -47,22 +47,10 @@ export const Errors = {
     httpStatus: 400,
     category: "validation",
   },
-  BAD_REQUEST: {
-    code: "BAD_REQUEST",
-    message: "Bad request.",
-    httpStatus: 400,
-    category: "business",
-  },
-  EMPTY_MODEL_RESPONSE: {
-    code: "EMPTY_MODEL_RESPONSE",
-    message: "The model returned an empty response.",
+  GENERATION_FAILED: {
+    code: "GENERATION_FAILED",
+    message: "Model failed to generate a response.",
     httpStatus: 502,
-    category: "system",
-  },
-  TRANSCRIPTION_FAILED: {
-    code: "TRANSCRIPTION_FAILED",
-    message: "Failed to transcribe audio.",
-    httpStatus: 500,
-    category: "system",
+    category: "external",
   },
 } as const;

@@ -31,7 +31,7 @@ export const addEvidence: RequestHandler = catchAsync(async (req, res) => {
   const audio = files.audio?.[0];
 
   if (!image) {
-    throw new AppError(Errors.BAD_REQUEST, { message: 'Image file is required' });
+    throw new AppError(Errors.VALIDATION, { message: 'Image file is required' });
   }
 
   // audio: never touches disk, buffer goes straight to transcription and is discarded

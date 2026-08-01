@@ -68,14 +68,14 @@ export const errorHandler = (err: unknown, req: Request, res: Response, _next: N
   });
 };
 
-const logLevelByCategory = (category: "system" | "validation" | "business"): "error" | "warn" | "info" => {
+const logLevelByCategory = (category: "system" | "validation" | "external"): "error" | "info" => {
   switch (category) {
     case "system":
       return "error";
     case "validation":
       return "info";
-    case "business":
-      return "warn";
+    case "external":
+      return "error";
   }
 };
 
