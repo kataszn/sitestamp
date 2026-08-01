@@ -34,7 +34,7 @@ export function getDB(): PrismaClient {
   return db;
 }
 
-// DB proxy for convenient access throughout the app
+// DB proxy for convenient access in repos
 export const DB = new Proxy({} as PrismaClient, {
   get(_target, prop: string | symbol) {
     if (typeof prop !== "string") {
