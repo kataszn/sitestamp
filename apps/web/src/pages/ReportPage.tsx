@@ -57,6 +57,24 @@ export const ReportPage: React.FC = () => {
 
   const showGeneratingView = generateRequested || visit?.status === "GENERATING";
 
+  const [captionStep, setCaptionStep] = useState(0);
+  const steps = ["Loading evidence", "Analyzing images", "Writing report"];
+
+  useEffect(() => {
+    if (!showGeneratingView) {
+      setCaptionStep(0);
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setCaptionStep((prev) => (prev < steps.length ? prev + 1 : prev));
+    }, 5000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [showGeneratingView]);
+
   const renderGeneratingView = () => (
     <div className="report-page">
       <div className="sheet" style={{ padding: "44px 28px" }}>
@@ -88,15 +106,14 @@ export const ReportPage: React.FC = () => {
             <div style={{ fontFamily: "Space Grotesk, sans-serif", fontSize: "20px", fontWeight: 600, marginBottom: "8px" }}>
               Generating report
             </div>
-            <p style={{ margin: 0, color: "var(--steel)", fontSize: "14px", lineHeight: 1.6 }}>
-              The inspection assistant is analyzing the evidence and compiling the final report. This page will update automatically when generation finishes.
-            </p>
           </div>
 
           <div className="generation-caption">
-            <span>Loading evidence</span>
-            <span>Analyzing images</span>
-            <span>Writing report</span>
+            {captionStep < steps.length ? (
+              <span className="caption-active">{steps[captionStep]}</span>
+            ) : (
+              <span className="caption-active">Please wait</span>
+            )}
           </div>
         </div>
       </div>
