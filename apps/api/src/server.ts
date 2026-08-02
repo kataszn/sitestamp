@@ -1,10 +1,10 @@
 import express from "express";
-import { registerMiddlewares, errorHandler, notFoundHandler } from "./core/middlewares";
-import { createV1Routes } from "./core/route";
-import { connectDB, isDBConnected } from "./core/db";
-import { openApiSpec } from "./core/openapi";
+import { registerMiddlewares, errorHandler, notFoundHandler } from "#core/middlewares";
+import { createV1Routes } from "#core/route";
+import { connectDB, isDBConnected } from "#core/db";
+import { openApiSpec } from "#core/openapi";
 import swaggerUi from "swagger-ui-express";
-import { ENV } from "./core/env";
+import { ENV } from "#core/env";
 import fs from "node:fs/promises";
 
 export async function createServer(): Promise<express.Express> {

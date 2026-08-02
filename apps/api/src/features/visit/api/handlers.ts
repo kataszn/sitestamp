@@ -1,12 +1,12 @@
 import { CaptionSource } from "@inspectai/shared";
-import { AppError, Errors } from "../../../core/errors";
-import { catchAsync } from "../../../utils/catch-async";
-import * as services from "../domain/service";
-import { transcribeAudio } from "../infra/gemma.client";
+import { AppError, Errors } from "#core/errors";
+import { catchAsync } from "#utils/catch-async";
+import * as services from "#features/visit/domain/service";
+import { transcribeAudio } from "#features/visit/infra/gemma.client";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import fs from 'node:fs/promises';
-import { ENV } from "../../../core/env";
+import { ENV } from "#core/env";
 import { RequestHandler } from "express";
 
 export const createVisit: RequestHandler = catchAsync(async (req, res) => {

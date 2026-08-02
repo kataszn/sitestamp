@@ -4,9 +4,9 @@ import express from "express";
 import morgan from "morgan";
 import type { Request, Response, NextFunction } from "express";
 
-import { logger } from "./logger";
-import { ENV } from "./env";
-import { AppError, Errors } from "./errors";
+import { logger } from "#core/logger";
+import { ENV } from "#core/env";
+import { AppError, Errors } from "#core/errors";
 
 export function registerMiddlewares(app: express.Express): void {
   app.use(express.json({ limit: "10mb" }));

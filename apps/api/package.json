@@ -3,6 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "imports": {
+    "#/*": "./src/*",
+    "#core/*": "./src/core/*",
+    "#features/*": "./src/features/*",
+    "#middlewares/*": "./src/middlewares/*",
+    "#utils/*": "./src/utils/*"
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts | pino-colada",
     "build": "tsc",

@@ -1,9 +1,9 @@
 import { Router } from "express";
 
-import validate from "../../../middlewares/validate";
-import * as handlers from "./handlers";
+import validate from "#middlewares/validate";
+import * as handlers from "#features/visit/api/handlers";
 import { schema } from "@inspectai/shared";
-import { evidenceUpload } from "../../../middlewares/upload";
+import { evidenceUpload } from "#middlewares/upload";
 
 const router: Router = Router({ mergeParams: true });
 

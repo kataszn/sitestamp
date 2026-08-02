@@ -1,8 +1,8 @@
 import { GoogleGenAI, Type, ApiError } from '@google/genai';
 import { schema, type ReportDTO } from '@inspectai/shared';
-import { ENV } from '../../../core/env';
-import { AppError, Errors } from '../../../core/errors';
-import { buildInspectionPrompt } from '../domain/report.prompt';
+import { ENV } from '#core/env';
+import { AppError, Errors } from '#core/errors';
+import { buildInspectionPrompt } from '#features/visit/domain/report.prompt';
 
 const ai = new GoogleGenAI({ apiKey: ENV.GOOGLE_AI_API_KEY });
 

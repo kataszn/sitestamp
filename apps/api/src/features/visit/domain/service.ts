@@ -6,13 +6,13 @@ import type {
   ReportDTO,
   DefectData,
 } from "@inspectai/shared";
-import { AppError, Errors } from "../../../core/errors";
-import * as repo from "../infra/repo";
-import * as mapper from "../api/mapper";
-import * as gemma from "../infra/gemma.client";
+import { AppError, Errors } from "#core/errors";
+import * as repo from "#features/visit/infra/repo";
+import * as mapper from "#features/visit/api/mapper";
+import * as gemma from "#features/visit/infra/gemma.client";
 import path from "node:path";
 import fs from "node:fs";
-import { ENV } from "../../../core/env";
+import { ENV } from "#core/env";
 
 export const createVisit = async (input: CreateVisitInput): Promise<VisitDTO> => {
   const visit = await repo.create(input);

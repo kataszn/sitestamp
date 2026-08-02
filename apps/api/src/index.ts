@@ -1,6 +1,6 @@
-import { createServer } from "./server";
-import { ENV } from "./core/env";
-import { logger } from "./core/logger";
+import { createServer } from "#/server";
+import { ENV } from "#core/env";
+import { logger } from "#core/logger";
 
 process.on("unhandledRejection", (reason) => {
   throw reason;

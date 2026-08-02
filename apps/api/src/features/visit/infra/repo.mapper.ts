@@ -1,5 +1,5 @@
-import { normalizeRecord } from "../../../utils/normalize-record";
-import { Defect, Evidence, Report, Visit } from "../domain/model";
+import { normalizeRecord } from "#utils/normalize-record";
+import { Defect, Evidence, Report, Visit } from "#features/visit/domain/model";
 
 export function toDomainEvidence(record: any): Evidence {
   const normalized = normalizeRecord(record);

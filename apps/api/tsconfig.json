@@ -5,7 +5,14 @@
     "moduleResolution": "bundler",
     "outDir": "./dist",
     "rootDir": "./src",
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "#/*": ["./src/*"],
+      "#core/*": ["./src/core/*"],
+      "#features/*": ["./src/features/*"],
+      "#middlewares/*": ["./src/middlewares/*"],
+      "#utils/*": ["./src/utils/*"]
+    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]

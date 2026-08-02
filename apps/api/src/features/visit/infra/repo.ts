@@ -1,9 +1,9 @@
 import { CreateVisitInput, AddEvidenceInput, SaveReportInput } from "@inspectai/shared";
-import { isPrismaNotFound, PrismaClientError } from '../../../utils/prisma';
+import { isPrismaNotFound, PrismaClientError } from '#utils/prisma';
 
-import { DB } from "../../../core/db";
-import { Evidence, Report, Visit } from "../domain/model";
-import * as mapper from "./repo.mapper";
+import { DB } from "#core/db";
+import { Evidence, Report, Visit } from "#features/visit/domain/model";
+import * as mapper from "#features/visit/infra/repo.mapper";
 
 export async function create(input: CreateVisitInput): Promise<Visit> {
   const record = await DB.visit.create({
