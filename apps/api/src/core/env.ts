@@ -14,7 +14,7 @@ const envSchema = z.object({
 
   DATABASE_URL: z.string(),
   CORS_ORIGIN: z.string().default("http://localhost:3000"),
-  GOOGLE_API_KEY: z.string(),
+  GOOGLE_AI_API_KEY: z.string(),
   TRANSCRIBE_MODEL: z.string(),
   GENERATE_MODEL: z.string(),
 });

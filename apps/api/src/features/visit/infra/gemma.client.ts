@@ -4,7 +4,7 @@ import { ENV } from '../../../core/env';
 import { AppError, Errors } from '../../../core/errors';
 import { buildInspectionPrompt } from '../domain/report.prompt';
 
-const ai = new GoogleGenAI({ apiKey: ENV.GOOGLE_API_KEY });
+const ai = new GoogleGenAI({ apiKey: ENV.GOOGLE_AI_API_KEY });
 
 export async function transcribeAudio(
   buffer: Buffer,

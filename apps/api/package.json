@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts | pino-colada",
+    "build": "tsc",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
