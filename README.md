@@ -101,5 +101,3 @@ pnpm dev
 ## Repository
 
 This project uses a Turborepo monorepo with shared packages between the frontend and backend.
-
-````
