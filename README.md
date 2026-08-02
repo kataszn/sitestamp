@@ -29,7 +29,7 @@ Built for the **Build with Gemma: AI for Africa Hackathon – Minna 2026**.
 │   └── shared/       # Shared types & utilities
 ├── turbo.json
 └── package.json
-
+```
 ---
 
 ## Tech Stack
