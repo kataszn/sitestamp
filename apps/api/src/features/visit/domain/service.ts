@@ -1,18 +1,21 @@
+import path from "node:path";
+import fs from "node:fs/promises";
+import { randomUUID } from "node:crypto";
+
 import type {
-  CreateVisitInput,
-  AddEvidenceInput,
   VisitDTO,
   EvidenceDTO,
   ReportDTO,
   DefectData,
+  CaptionSource,
 } from "@inspectai/shared";
 import { AppError, Errors } from "#core/errors";
 import * as repo from "#features/visit/infra/repo";
 import * as mapper from "#features/visit/api/mapper";
 import * as gemma from "#features/visit/infra/gemma.client";
-import path from "node:path";
-import fs from "node:fs";
 import { ENV } from "#core/env";
+import type { CreateVisitInput, AddEvidenceInput } from "./types";
+import { transcribeAudio } from "#features/visit/infra/gemma.client";
 
 export const createVisit = async (input: CreateVisitInput): Promise<VisitDTO> => {
   const visit = await repo.create(input);
@@ -20,7 +23,31 @@ export const createVisit = async (input: CreateVisitInput): Promise<VisitDTO> =>
 };
 
 export const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO> => {
-  const evidence = await repo.addEvidence(input);
+  const { visitId, image, audio } = input;
+  let captionSource: CaptionSource | null = input.caption ? 'TEXT' : null;
+  let caption = input.caption;
+
+  // audio: never touches disk, buffer goes straight to transcription and is discarded
+  if (audio) {
+    const audioCaption = await transcribeAudio(audio.buffer, audio.mimetype);
+    caption = audioCaption;
+    captionSource = 'VOICE';
+  }
+
+  // image: write buffer to disk, we need it to persist for the report + Gemma call
+  const ext = path.extname(image.originalname) || '.jpg';
+  const filename = `${caption || randomUUID()}-${ext}`;
+  await fs.writeFile(path.join(ENV.UPLOAD_DIR, filename), image.buffer);
+  const imageUrl = `/uploads/${filename}`;
+  
+
+  const evidence = await repo.addEvidence({
+    visitId,
+    imageUrl,
+    mimeType: image.mimetype,
+    caption,
+    captionSource: captionSource ?? undefined,
+  });
   if (!evidence) {
     throw new AppError(Errors.NOT_FOUND, { message: "Visit not found" });
   }
@@ -37,38 +64,45 @@ export const getVisit = async (visitId: string): Promise<VisitDTO> => {
 
 export const generateReport = async (visitId: string): Promise<ReportDTO> => {
   const visit = await getVisit(visitId);
-  await repo.updateStatus(visitId, "GENERATING");
+  if (!visit) {
+    throw new AppError(Errors.NOT_FOUND, { message: "Visit not found" });
+  }
 
-  const evidenceInputs = await Promise.all(
-    visit.evidence.map(async (e) => {
-      const filename = path.basename(e.imageUrl);
-      const imageBuffer = fs.readFileSync(path.join(ENV.UPLOAD_DIR, filename));
+  let savedReport;
+  try {
+    await repo.updateStatus(visitId, "GENERATING");
 
-      return {
-        imageBuffer,
-        mimeType: e.mimeType,
-        caption: e.caption,
-      };
-    })
-  );
+    const evidenceInputs = await Promise.all(
+      visit.evidence.map(async (e) => {
+        const filename = path.basename(e.imageUrl);
+        const imageBuffer = await fs.readFile(
+          path.join(ENV.UPLOAD_DIR, filename)
+        );
+        return { imageBuffer, mimeType: e.mimeType, caption: e.caption };
+      })
+    );
+    
+    const { report, raw } = await gemma.generateReport(
+      visit.siteName,
+      visit.notes,
+      evidenceInputs
+    );
 
-  const { report, raw } = await gemma.generateReport(
-    visit.siteName,
-    visit.notes,
-    evidenceInputs
-  );
+    report.defects = resolveEvidenceIds(report.defects, visit.evidence);
 
-  const resolved = resolveEvidenceIds(report.defects, visit.evidence);
-  report.defects = resolved;
+    savedReport = await repo.saveReport({
+      visitId,
+      ...report,
+      rawModelJson: raw,
+    });
+  } catch (error) {
+    // Reset the status so the job isn't permanently stuck in "GENERATING"
+    await repo.updateStatus(visitId, "OPEN");
+    throw error;
+  }
 
-  const saved = await repo.saveReport({
-    visitId,
-    ...report,
-    rawModelJson: raw,
-  });
   await repo.updateStatus(visitId, "COMPLETE");
-
-  return mapper.toReportDTO(saved);
+  return mapper.toReportDTO(savedReport!);
 };
 
 function resolveEvidenceIds(defects: DefectData[], evidence: EvidenceDTO[]) {
