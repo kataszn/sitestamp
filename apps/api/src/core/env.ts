@@ -10,7 +10,7 @@ const envSchema = z.object({
     .default("development"),
   PORT: z.coerce.number().default(8000),
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
-  SERVICE_NAME: z.string().default("inspectai-api"),
+  SERVICE_NAME: z.string().default("sitestamp-api"),
 
   DATABASE_URL: z.string(),
   CORS_ORIGIN: z.string().default("http://localhost:3000"),

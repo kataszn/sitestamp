@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, ApiError } from '@google/genai';
-import { schema, type ReportDTO } from '@inspectai/shared';
+import { schema, type ReportDTO } from '@sitestamp/shared';
 import { ENV } from '#core/env';
 import { AppError, Errors } from '#core/errors';
 import { buildInspectionPrompt } from '#features/visit/domain/report.prompt';

@@ -1,4 +1,4 @@
-import { Severity } from "@inspectai/shared";
+import { Severity } from "@sitestamp/shared";
 
 export interface Visit {
   id: string;

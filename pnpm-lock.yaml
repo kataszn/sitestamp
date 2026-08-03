@@ -17,7 +17,7 @@ importers:
       '@google/genai':
         specifier: ^2.15.0
         version: 2.15.0
-      '@inspectai/shared':
+      '@sitestamp/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@prisma/client':
@@ -90,7 +90,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@inspectai/shared':
+      '@sitestamp/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       react:

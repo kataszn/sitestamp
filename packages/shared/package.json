@@ -1,5 +1,5 @@
 {
-  "name": "@inspectai/shared",
+  "name": "@sitestamp/shared",
   "version": "1.0.0",
   "description": "Shared types and utilities for Inspection AI",
   "main": "./src/index.ts",

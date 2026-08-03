@@ -4,7 +4,7 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.1.0",
     info: {
-      title: "InspectAI API",
+      title: "SiteStamp API",
       version: "1.0.0",
       description:
         "API for managing bridge / infrastructure inspections. Collect evidence (photos, audio) and generate AI-powered defect reports.",

@@ -1,4 +1,4 @@
-# InspectAI 🔍
+# SiteStamp 🔍
 
 > AI-powered infrastructure inspection platform that transforms field evidence into professional engineering reports using Google's Gemma models.
 
@@ -54,7 +54,7 @@ Built for the **Build with Gemma: AI for Africa Hackathon – Minna 2026**.
 ```bash
 git clone <repository-url>
 
-cd inspectai
+cd sitestamp
 
 pnpm install
 ```

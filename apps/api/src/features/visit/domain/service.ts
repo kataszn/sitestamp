@@ -8,7 +8,7 @@ import type {
   ReportDTO,
   DefectData,
   CaptionSource,
-} from "@inspectai/shared";
+} from "@sitestamp/shared";
 import { AppError, Errors } from "#core/errors";
 import * as repo from "#features/visit/infra/repo";
 import * as mapper from "#features/visit/api/mapper";
