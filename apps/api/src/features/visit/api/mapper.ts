@@ -1,4 +1,4 @@
-import { EvidenceDTO, VisitDTO, ReportDTO } from "@inspectai/shared";
+import { EvidenceDTO, VisitDTO, ReportDTO } from "@sitestamp/shared";
 import { Evidence, Report, Visit } from "#features/visit/domain/model";
 
 const toEvidenceDTO = (evidence: Evidence): EvidenceDTO => ({

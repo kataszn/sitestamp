@@ -1,4 +1,4 @@
-import { CaptionSource } from "@inspectai/shared";
+import { CaptionSource } from "@sitestamp/shared";
 import { AppError, Errors } from "#core/errors";
 import { catchAsync } from "#utils/catch-async";
 import * as services from "#features/visit/domain/service";

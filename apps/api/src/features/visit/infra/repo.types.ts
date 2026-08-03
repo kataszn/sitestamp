@@ -1,4 +1,4 @@
-import { DefectData, Severity } from "@inspectai/shared";
+import { DefectData, Severity } from "@sitestamp/shared";
 
 export type CreateVisit = {
   siteName: string;
