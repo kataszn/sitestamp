@@ -26,7 +26,10 @@ export const getAllVisits: RequestHandler = catchAsync(async (req, res) => {
 });
 
 export const addEvidence: RequestHandler = catchAsync(async (req, res) => {
-  const files = req.files as { image?: Express.Multer.File[]; audio?: Express.Multer.File[] };
+  const files = req.files as {
+    image?: Express.Multer.File[];
+    audio?: Express.Multer.File[];
+  };
   const image = files.image?.[0];
   const audio = files.audio?.[0];
 
@@ -34,39 +37,18 @@ export const addEvidence: RequestHandler = catchAsync(async (req, res) => {
     throw new AppError(Errors.VALIDATION, { message: 'Image file is required' });
   }
 
-  // audio: never touches disk, buffer goes straight to transcription and is discarded
-  let caption = req.body.caption;
-  let captionSource: CaptionSource = 'TEXT';
-
-  if (audio) {
-    const audioCaption = await transcribeAudio(audio.buffer, audio.mimetype);
-    caption = audioCaption;
-    captionSource = 'VOICE';
-  }
-
-  // image: write buffer to disk, we need it to persist for the report + Gemma call
-  const ext = path.extname(image.originalname) || '.jpg';
-  const filename = `${caption || randomUUID()}-${ext}`;
-  await fs.writeFile(path.join(ENV.UPLOAD_DIR, filename), image.buffer);
-  const imageUrl = `/uploads/${filename}`;
-  
-
   const evidence = await services.addEvidence({
     visitId: req.params.id as string,
-    imageUrl,
-    mimeType: image.mimetype,
-    caption,
-    captionSource,
+    caption: req.body.caption,
+    image,
+    audio,
   });
   res.status(200).json(evidence);
 });
 
 export const generateReport: RequestHandler = catchAsync(async (req, res) => {
   const visitId = req.params.id as string;
-  void services.generateReport(visitId).catch(async (error) => {
-    console.error("Failed to generate report", error);
-    await services.updateVisitStatus(visitId, "OPEN");
-  });
+  await services.generateReport(visitId);
   res.status(202).json({ status: "GENERATING" });
 });
 

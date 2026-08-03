@@ -21,17 +21,3 @@ export interface EvidenceDTO {
 }
 
 export type CaptionSource = 'TEXT' | 'VOICE';
-
-export interface CreateVisitInput {
-  siteName: string;
-  inspectorName: string;
-  notes?: string;
-}
-
-export interface AddEvidenceInput {
-  visitId: string;
-  imageUrl: string; // already-uploaded URL; keep upload separate from this call
-  mimeType: string; 
-  caption?: string;
-  captionSource?: CaptionSource;
-}

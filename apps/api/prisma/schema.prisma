@@ -33,7 +33,7 @@ model Evidence {
   imageUrl      String
   mimeType      String
   caption       String? // final text, if captionSource is AUDIO, this is the transcript
-  captionSource CaptionSource @default(TEXT)
+  captionSource CaptionSource? @default(TEXT)
   audioUrl      String? // kept for reference/playback, not sent to Gemma again
   createdAt     DateTime      @default(now())
 }
