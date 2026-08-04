@@ -13,7 +13,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts | pino-colada",
     "start": "prisma migrate deploy && tsx src/index.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
