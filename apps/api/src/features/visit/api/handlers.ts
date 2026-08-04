@@ -1,5 +1,6 @@
 import { CaptionSource } from "@sitestamp/shared";
 import { AppError, Errors } from "#core/errors";
+import { logger } from "#core/logger";
 import { catchAsync } from "#utils/catch-async";
 import * as services from "#features/visit/domain/service";
 import { transcribeAudio } from "#features/visit/infra/gemma.client";
@@ -48,8 +49,13 @@ export const addEvidence: RequestHandler = catchAsync(async (req, res) => {
 
 export const generateReport: RequestHandler = catchAsync(async (req, res) => {
   const visitId = req.params.id as string;
-  await services.generateReport(visitId);
+  // Return 202 immediately — report generation runs in the background
   res.status(202).json({ status: "GENERATING" });
+
+  // Fire-and-forget: todo: consider using a queue/events system
+  services.generateReport(visitId).catch((err) => {
+    logger.error("Background report generation failed", { visitId, err });
+  });
 });
 
 export const getReport: RequestHandler = catchAsync(async (req, res) => {
