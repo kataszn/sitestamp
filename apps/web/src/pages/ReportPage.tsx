@@ -48,7 +48,7 @@ export const ReportPage: React.FC = () => {
 
     const timer = window.setInterval(() => {
       void fetchVisit();
-    }, 2500);
+    }, 1000);
 
     return () => {
       clearInterval(timer);
