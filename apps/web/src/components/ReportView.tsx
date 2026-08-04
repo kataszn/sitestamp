@@ -1,14 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { VisitDTO } from "@sitestamp/shared";
 import SeverityGauge from "./SeverityGauge";
 import DefectItem from "./DefectItem";
 
-interface ReportViewProps {
-  visit: VisitDTO;
-}
-
-export const ReportView: React.FC<ReportViewProps> = ({ visit }) => {
+export function ReportView({ visit }: { visit: VisitDTO }) {
   const navigate = useNavigate();
   const { report, evidence, id, siteName, createdAt } = visit;
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -16,12 +12,26 @@ export const ReportView: React.FC<ReportViewProps> = ({ visit }) => {
   const evidenceRef = useRef<HTMLDivElement>(null);
 
   if (!report) {
-    return <div className="state-message">No report generated for this visit yet.</div>;
+    return (
+      <div className="report-page">
+        <div className="sheet" style={{ padding: "60px 20px", textAlign: "center" }}>
+          <div className="state-message">
+            <h2>No Report Generated Yet</h2>
+            <p>This site visit is still open. Add evidence and generate a report to see it here.</p>
+            <div style={{ marginTop: "20px" }}>
+              <Link to={`/visits/${visit.id}`} className="btn">Go to Visit Details &amp; Add Evidence</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const selectedEvidenceIds = new Set(
     selectedIndex !== null ? report.defects[selectedIndex]?.evidenceIds ?? [] : []
   );
+
+  const isStale = visit.status === 'OPEN';
 
   // Scroll the first highlighted evidence chip into view when a defect is selected
   useEffect(() => {
@@ -29,6 +39,10 @@ export const ReportView: React.FC<ReportViewProps> = ({ visit }) => {
     const firstHighlighted = evidenceRef.current.querySelector<HTMLElement>(".evidence-chip.highlighted");
     if (firstHighlighted) {
       firstHighlighted.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      // Scroll a bit further so the chip isn't flush against the edge
+      setTimeout(() => {
+        window.scrollBy(0, 60);
+      }, 100);
     }
   }, [selectedIndex]);
 
@@ -67,10 +81,18 @@ export const ReportView: React.FC<ReportViewProps> = ({ visit }) => {
 
   return (
     <div className="sheet">
+      {/* Stale banner when report exists but visit is OPEN (regenerate was clicked) */}
+      {isStale && (
+        <div className="stale-banner">
+          This report was generated before recent changes to this visit's evidence.{' '}
+          <Link to={`/visits/${id}`} className="inline-link">Add more evidence or regenerate</Link>.
+        </div>
+      )}
+
       {/* 1. Optional review banner at the very top */}
       {report.needsReview && (
         <div className="review-banner">
-          Attention: This report requires engineering review. Some observations are ambiguous.
+          Flagged for manual review — one or more defects could not be assessed with confidence
         </div>
       )}
 

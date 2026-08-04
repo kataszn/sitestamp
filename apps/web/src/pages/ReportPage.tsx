@@ -143,24 +143,6 @@ export const ReportPage: React.FC = () => {
     return renderGeneratingView();
   }
 
-  if (!visit.report || visit.status !== "COMPLETE") {
-    return (
-      <div className="report-page">
-        <div className="sheet" style={{ padding: "60px 20px", textAlign: "center" }}>
-          <div className="state-message">
-            <h2>No Report Generated Yet</h2>
-            <p>The site visit is still OPEN. You must add evidence and trigger report generation first.</p>
-            <div style={{ marginTop: "20px" }}>
-              <Link to={`/visits/${visit.id}`} className="btn">
-                Go to Visit Details & Add Evidence
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="report-page">
       <ReportView visit={visit} />
