@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { VisitDTO } from "@sitestamp/shared";
 import ReportView from "../components/ReportView";
@@ -10,6 +10,7 @@ export const ReportPage: React.FC = () => {
   const [visit, setVisit] = useState<VisitDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
 
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/v1";
   const generateRequested = searchParams.get("generate") === "1";
@@ -59,33 +60,79 @@ export const ReportPage: React.FC = () => {
     (generateRequested || visit?.status === "GENERATING") && visit?.status !== "FAILED";
 
   const handleRetry = async () => {
+    if (retrying) return;
+    setRetrying(true);
     try {
-      await fetch(`${apiBase}/visits/${id}/report`, { method: "POST" });
+      // Reset the visit to OPEN so the report is marked stale; the user can
+      // then regenerate from the visit details page.
+      await fetch(`${apiBase}/visits/${id}/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "OPEN" }),
+      });
     } catch (err) {
-      console.error("Failed to retry report generation", err);
+      console.error("Failed to reset visit status", err);
+      setRetrying(false);
+      return;
     }
-    // Redirect to the visit details page (same flow as regenerate) so the
-    // page mounts fresh and reflects the current status reliably.
+    // Navigate to the visit details page with the visit back in OPEN status.
     navigate(`/visits/${id}`);
   };
 
   const [noteStep, setNoteStep] = useState(0);
-  const steps = ["Loading evidence", "Analyzing images", "Writing report"];
+  const [elapsed, setElapsed] = useState(0);
+
+  const generatingSteps = useMemo(() => {
+    const photoCount = visit?.evidence.length ?? 0;
+    const hasVoiceNote = visit?.evidence.some((e) => e.noteSource === 'VOICE') ?? false;
+    const hasEvidenceNotes = visit?.evidence.some((e) => e.note && e.noteSource === 'TEXT') ?? false;
+    const hasNotes = Boolean(visit?.notes);
+    return [
+      "Processing",
+
+      `Reading ${photoCount} photo${photoCount === 1 ? '' : 's'}`,
+
+      ...(hasVoiceNote
+        ? ["Transcribing voice observations"]
+        : []),
+
+      ...(hasEvidenceNotes
+        ? ["Reviewing evidence observations"]
+        : []),
+
+      ...(hasNotes
+        ? ["Incorporating inspector notes"]
+        : []),
+
+      "Correlating observations across evidence",
+
+      "Identifying structural defects",
+
+      "Assessing defect severity",
+
+      "Drafting engineering recommendations",
+
+      "Building inspection report",
+    ];
+  }, [visit]);
 
   useEffect(() => {
     if (!showGeneratingView) {
       setNoteStep(0);
+      setElapsed(0);
       return;
     }
 
-    const timer = window.setInterval(() => {
-      setNoteStep((prev) => (prev < steps.length ? prev + 1 : prev));
-    }, 5000);
+    const stepTimer = window.setInterval(() => {
+      setNoteStep((i) => Math.min(i + 1, generatingSteps.length - 1));
+    }, 4000);
+    const clock = window.setInterval(() => setElapsed((s) => s + 1), 1000);
 
     return () => {
-      clearInterval(timer);
+      clearInterval(stepTimer);
+      clearInterval(clock);
     };
-  }, [showGeneratingView]);
+  }, [showGeneratingView, generatingSteps.length]);
 
   const renderGeneratingView = () => (
     <div className="report-page">
@@ -118,14 +165,13 @@ export const ReportPage: React.FC = () => {
             <div style={{ fontFamily: "Space Grotesk, sans-serif", fontSize: "20px", fontWeight: 600, marginBottom: "8px" }}>
               Generating report
             </div>
+            <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "11px", color: "var(--steel)" }}>
+              {elapsed}s elapsed — typically takes 30–60s
+            </div>
           </div>
 
           <div className="generation-note">
-            {noteStep < steps.length ? (
-              <span className="note-active">{steps[noteStep]}</span>
-            ) : (
-              <span className="note-active">Please wait</span>
-            )}
+            <span className="note-active">{generatingSteps[noteStep]}…</span>
           </div>
         </div>
       </div>
@@ -160,8 +206,8 @@ export const ReportPage: React.FC = () => {
           <p style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "12.5px", color: "var(--steel)", margin: "0 0 20px" }}>
             The AI model could not complete the report. You can try again, or go back to review your evidence.
           </p>
-          <button className="btn" onClick={handleRetry}>
-            Try again
+          <button className="btn" onClick={handleRetry} disabled={retrying}>
+            {retrying ? "Resetting visit…" : "Try again"}
           </button>
         </div>
       </div>

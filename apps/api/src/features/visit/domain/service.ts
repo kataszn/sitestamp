@@ -1,5 +1,6 @@
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import sharp from 'sharp';
 
 import type {
   VisitDTO,
@@ -12,7 +13,6 @@ import { AppError, Errors } from "#core/errors";
 import * as repo from "#features/visit/infra/repo";
 import * as mapper from "#features/visit/api/mapper";
 import * as gemma from "#features/visit/infra/gemma.client";
-import { ENV } from "#core/env";
 import type { CreateVisitInput, AddEvidenceInput } from "./types";
 import { transcribeAudio } from "#features/visit/infra/gemma.client";
 import { storage } from "#features/visit/infra/storage";
@@ -37,7 +37,8 @@ export const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO>
   // image: save to storage
   const ext = path.extname(image.originalname) || '.jpg';
   const filename = `${note || randomUUID()}-${ext}`;
-  const imageUrl = await storage.save(image.buffer, filename, image.mimetype);
+  const processedBuffer = await prepareImageForUpload(image.buffer);
+  const imageUrl = await storage.save(processedBuffer, filename, image.mimetype);
   
 
   const evidence = await repo.addEvidence({
@@ -52,6 +53,14 @@ export const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO>
   }
   return mapper.toEvidenceDTO(evidence);
 };
+
+async function prepareImageForUpload(buffer: Buffer): Promise<Buffer> {
+  const resized = await sharp(buffer)
+    .resize(1600, 1600, { fit: 'inside', withoutEnlargement: true })
+    .jpeg({ quality: 78 })
+    .toBuffer();
+  return resized;
+}
 
 export const getVisit = async (visitId: string): Promise<VisitDTO> => {
   const visit = await repo.find(visitId);

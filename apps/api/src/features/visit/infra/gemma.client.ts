@@ -85,7 +85,7 @@ export async function generateReport(
   if (!raw) {
     throw new AppError(Errors.GENERATION_FAILED, { message: "The model returned an empty response." });
   }
-
+  
   const parsed = JSON.parse(raw);
   return { report: schema.report.parse(parsed), raw };
 }
