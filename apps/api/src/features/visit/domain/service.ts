@@ -6,7 +6,7 @@ import type {
   EvidenceDTO,
   ReportDTO,
   DefectData,
-  CaptionSource,
+  NoteSource,
 } from "@sitestamp/shared";
 import { AppError, Errors } from "#core/errors";
 import * as repo from "#features/visit/infra/repo";
@@ -24,19 +24,19 @@ export const createVisit = async (input: CreateVisitInput): Promise<VisitDTO> =>
 
 export const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO> => {
   const { visitId, image, audio } = input;
-  let captionSource: CaptionSource | null = input.caption ? 'TEXT' : null;
-  let caption = input.caption;
+  let noteSource: NoteSource | null = input.note ? 'TEXT' : null;
+  let note = input.note;
 
   // audio: never saved, transcribed to text and replaces text note
   if (audio) {
-    const audioCaption = await transcribeAudio(audio.buffer, audio.mimetype);
-    caption = audioCaption;
-    captionSource = 'VOICE';
+    const audioNote = await transcribeAudio(audio.buffer, audio.mimetype);
+    note = audioNote;
+    noteSource = 'VOICE';
   }
 
   // image: save to storage
   const ext = path.extname(image.originalname) || '.jpg';
-  const filename = `${caption || randomUUID()}-${ext}`;
+  const filename = `${note || randomUUID()}-${ext}`;
   const imageUrl = await storage.save(image.buffer, filename, image.mimetype);
   
 
@@ -44,8 +44,8 @@ export const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO>
     visitId,
     imageUrl,
     mimeType: image.mimetype,
-    caption,
-    captionSource: captionSource ?? undefined,
+    note,
+    noteSource: noteSource ?? undefined,
   });
   if (!evidence) {
     throw new AppError(Errors.NOT_FOUND, { message: "Visit not found" });
@@ -74,7 +74,7 @@ export const generateReport = async (visitId: string): Promise<ReportDTO> => {
     const evidenceInputs = await Promise.all(
       visit.evidence.map(async (e) => {
         const imageBuffer = await storage.read(e.imageUrl);
-        return { imageBuffer, mimeType: e.mimeType, caption: e.caption };
+        return { imageBuffer, mimeType: e.mimeType, note: e.note };
       })
     );
     

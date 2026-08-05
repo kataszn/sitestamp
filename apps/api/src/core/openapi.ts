@@ -49,13 +49,13 @@ const options: swaggerJsdoc.Options = {
         },
         EvidenceDTO: {
           type: "object",
-          required: ["id", "imageUrl", "caption", "audioUrl", "captionSource"],
+          required: ["id", "imageUrl", "note", "audioUrl", "noteSource"],
           properties: {
             id: { type: "string" },
             imageUrl: { type: "string", format: "uri", example: "/uploads/abc123.jpg" },
-            caption: { type: "string", nullable: true, example: "Crack detected on the underside" },
+            note: { type: "string", nullable: true, example: "Crack detected on the underside" },
             audioUrl: { type: "string", nullable: true, example: "/uploads/def456.wav" },
-            captionSource: { type: "string", enum: ["TEXT", "VOICE"], nullable: true },
+            noteSource: { type: "string", enum: ["TEXT", "VOICE"], nullable: true },
           },
         },
         AddEvidenceInput: {
@@ -63,9 +63,9 @@ const options: swaggerJsdoc.Options = {
           required: ["imageUrl"],
           properties: {
             imageUrl: { type: "string", format: "uri" },
-            caption: { type: "string" },
+            note: { type: "string" },
             audioUrl: { type: "string", format: "uri" },
-            captionSource: { type: "string", enum: ["TEXT", "VOICE"] },
+            noteSource: { type: "string", enum: ["TEXT", "VOICE"] },
           },
         },
         ReportDTO: {

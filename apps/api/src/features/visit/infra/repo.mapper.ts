@@ -9,8 +9,8 @@ export function toDomainEvidence(record: any): Evidence {
     visitId: String(normalized.visitId),
     imageUrl: String(normalized.imageUrl),
     mimeType: String(normalized.mimeType),
-    caption: normalized.caption ?? null,
-    captionSource: normalized.captionSource ?? null,
+    note: normalized.note ?? null,
+    noteSource: normalized.noteSource ?? null,
   };
 }
 

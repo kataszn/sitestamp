@@ -170,11 +170,11 @@ export function ReportView({ visit }: { visit: VisitDTO }) {
                 <img
                   className="thumb"
                   src={getMediaUrl(item.imageUrl)}
-                  alt={item.caption || "Inspection Evidence"}
+                  alt={item.note || "Inspection Evidence"}
                 />
-                <span>{item.caption || "No caption provided"}</span>
-                {item.captionSource === "VOICE" && (
-                  <span className="source-tag" title="Voice Caption Transcription">
+                <span>{item.note || "No note provided"}</span>
+                {item.noteSource === "VOICE" && (
+                  <span className="source-tag" title="Voice Note Transcription">
                     🎙️
                   </span>
                 )}
@@ -233,10 +233,10 @@ export function ReportView({ visit }: { visit: VisitDTO }) {
           <div onClick={(e) => e.stopPropagation()} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px", maxWidth: "90vw", maxHeight: "90vh" }}>
             <img
               src={getMediaUrl(item.imageUrl)}
-              alt={item.caption || "Evidence"}
-              style={{ maxWidth: "100%", maxHeight: item.caption ? "75vh" : "85vh", objectFit: "contain", borderRadius: "4px" }}
+              alt={item.note || "Evidence"}
+              style={{ maxWidth: "100%", maxHeight: item.note ? "75vh" : "85vh", objectFit: "contain", borderRadius: "4px" }}
             />
-            {item.caption && <p style={{ margin: 0, color: "#fff", fontSize: "15px", lineHeight: "1.5", textAlign: "center", maxWidth: "600px" }}>{item.caption}</p>}
+            {item.note && <p style={{ margin: 0, color: "#fff", fontSize: "15px", lineHeight: "1.5", textAlign: "center", maxWidth: "600px" }}>{item.note}</p>}
           </div>
 
           <button

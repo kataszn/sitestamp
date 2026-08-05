@@ -35,13 +35,13 @@ model Evidence {
   visit         Visit         @relation(fields: [visitId], references: [id])
   imageUrl      String
   mimeType      String
-  caption       String? // final text, if captionSource is AUDIO, this is the transcript
-  captionSource CaptionSource? @default(TEXT)
+  note          String? // final text, if noteSource is VOICE, this is the transcript
+  noteSource    NoteSource? @default(TEXT)
   audioUrl      String? // kept for reference/playback, not sent to Gemma again
   createdAt     DateTime      @default(now())
 }
 
-enum CaptionSource {
+enum NoteSource {
   TEXT
   VOICE
 }

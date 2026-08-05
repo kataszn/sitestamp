@@ -17,8 +17,8 @@ export interface EvidenceDTO {
   id: string;
   imageUrl: string;
   mimeType: string;
-  caption: string | null;
-  captionSource: CaptionSource | null;
+  note: string | null;
+  noteSource: NoteSource | null;
 }
 
-export type CaptionSource = 'TEXT' | 'VOICE';
+export type NoteSource = 'TEXT' | 'VOICE';

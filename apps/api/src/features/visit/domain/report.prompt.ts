@@ -1,7 +1,7 @@
 export function buildInspectionPrompt(
   siteName: string,
   notes: string | null,
-  evidence: { caption: string | null }[]
+  evidence: { note: string | null }[]
 ) {
   return `You are an experienced civil and structural engineering inspection assistant.
   
@@ -17,16 +17,16 @@ For each defect, include evidenceIndices: an array of the photo number(s) that s
 Instructions:
 
 - Consider all inspection evidence together before reaching conclusions.
-- Base conclusions only on the supplied images, captions and inspector notes.
+- Base conclusions only on the supplied images, notes and inspector notes.
 - Do not speculate about defects that are not reasonably supported by the evidence.
 - Use professional civil engineering terminology.
 - Merge observations that clearly refer to the same physical defect viewed from multiple angles or distances.
 - Keep defects separate when they occur on different structural elements or represent different damage.
 - The overall site severity should reflect the highest-risk condition affecting the structure.
 
-For each distinct defect visible across the photos, with and without caption, identify:
+For each distinct defect visible across the photos, with and without note, identify:
 - type (e.g. crack, spalling, corrosion, drainage blockage, joint failure)
-- approximate location, based on captions/notes if given
+- approximate location, based on notes/notes if given
 - severity: LOW, MODERATE, HIGH, or CRITICAL
 - a one-sentence description
 

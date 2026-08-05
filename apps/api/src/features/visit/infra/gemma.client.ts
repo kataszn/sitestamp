@@ -56,7 +56,7 @@ export async function generateReport(
   const prompt = buildInspectionPrompt(
     siteName,
     notes,
-    evidence.map((e) => ({ caption: e.caption }))
+    evidence.map((e) => ({ note: e.note }))
   );
 
   const response = await ai.models.generateContent({
@@ -93,7 +93,7 @@ export async function generateReport(
 interface EvidenceInput {
   imageBuffer: Buffer;
   mimeType: string;
-  caption: string | null;
+  note: string | null;
 }
 
 const GEMMA_REPORT_SCHEMA = {

@@ -69,17 +69,17 @@ export const ReportPage: React.FC = () => {
     navigate(`/visits/${id}`);
   };
 
-  const [captionStep, setCaptionStep] = useState(0);
+  const [noteStep, setNoteStep] = useState(0);
   const steps = ["Loading evidence", "Analyzing images", "Writing report"];
 
   useEffect(() => {
     if (!showGeneratingView) {
-      setCaptionStep(0);
+      setNoteStep(0);
       return;
     }
 
     const timer = window.setInterval(() => {
-      setCaptionStep((prev) => (prev < steps.length ? prev + 1 : prev));
+      setNoteStep((prev) => (prev < steps.length ? prev + 1 : prev));
     }, 5000);
 
     return () => {
@@ -120,11 +120,11 @@ export const ReportPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="generation-caption">
-            {captionStep < steps.length ? (
-              <span className="caption-active">{steps[captionStep]}</span>
+          <div className="generation-note">
+            {noteStep < steps.length ? (
+              <span className="note-active">{steps[noteStep]}</span>
             ) : (
-              <span className="caption-active">Please wait</span>
+              <span className="note-active">Please wait</span>
             )}
           </div>
         </div>

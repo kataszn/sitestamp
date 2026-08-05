@@ -13,8 +13,8 @@ export const addEvidence = z.object({
     id: z.cuid2(),
   }),
   body: z.object({
-    caption: z.string().optional(),
-    captionSource: z.enum(['TEXT', 'VOICE']).optional(),
+    note: z.string().optional(),
+    noteSource: z.enum(['TEXT', 'VOICE']).optional(),
   })
 });
 

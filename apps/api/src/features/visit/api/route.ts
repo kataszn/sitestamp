@@ -118,9 +118,9 @@ export default router;
  *                 type: string
  *                 format: binary
  *                 description: Optional voice note (WAV/MP3)
- *               caption:
+ *               note:
  *                 type: string
- *                 description: Optional text caption for the photo
+ *                 description: Optional text note for the photo
  *     responses:
  *       200:
  *         description: Evidence added successfully

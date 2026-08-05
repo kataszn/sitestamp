@@ -40,6 +40,6 @@ export interface Evidence {
   visitId: string;
   imageUrl: string;
   mimeType: string;
-  caption: string | null;
-  captionSource: 'TEXT' | 'VOICE' | null;
+  note: string | null;
+  noteSource: 'TEXT' | 'VOICE' | null;
 }
