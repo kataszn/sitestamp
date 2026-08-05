@@ -31,8 +31,6 @@ export function ReportView({ visit }: { visit: VisitDTO }) {
     selectedIndex !== null ? report.defects[selectedIndex]?.evidenceIds ?? [] : []
   );
 
-  const isStale = visit.status === 'OPEN';
-
   // Scroll the first highlighted evidence chip into view when a defect is selected
   useEffect(() => {
     if (selectedIndex === null || !evidenceRef.current) return;
@@ -79,8 +77,8 @@ export function ReportView({ visit }: { visit: VisitDTO }) {
   // Multimodal input summary for the title-block meta row
   const photoCount = evidence.length;
   const voiceNoteCount = evidence.filter((e) => e.noteSource === "VOICE").length;
-  const textNoteCount = evidence.filter((e) => e.noteSource === "TEXT").length;
-  const hasInspectorNotes = visit.notes != null || textNoteCount > 0;
+  const textNoteCount = evidence.filter((e) => e.noteSource === "TEXT" && e.note).length;
+  const hasInspectorNotes = visit.notes || textNoteCount > 0;
 
   const parts = [`${photoCount} Photo${photoCount === 1 ? "" : "s"}`];
   if (voiceNoteCount > 0) {
@@ -94,10 +92,12 @@ export function ReportView({ visit }: { visit: VisitDTO }) {
   return (
     <div className="sheet">
       {/* Stale banner when report exists but visit is OPEN (regenerate was clicked) */}
-      {isStale && (
+      {visit.status === 'GENERATING' && report && (
+        <div className="stale-banner">Regenerating this report — refreshing shortly…</div>
+      )}
+      {visit.status === 'OPEN' && report && (
         <div className="stale-banner">
-          This report was generated before recent changes to this visit's evidence.{' '}
-          <Link to={`/visits/${id}`} className="inline-link">Add more evidence or regenerate</Link>.
+          This report may be out of date. <Link to={`/visits/${visit.id}`} className="inline-link">Add evidence or regenerate</Link>.
         </div>
       )}
 

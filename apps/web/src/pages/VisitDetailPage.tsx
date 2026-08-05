@@ -33,7 +33,7 @@ export const VisitDetailPage: React.FC = () => {
       const data = await response.json();
       setVisit(data);
 
-      // If already complete or generating, redirect or adjust UI
+      // If already complete, show the report.
       if (data.status === "COMPLETE") {
         navigate(`/visits/${id}/report`);
       }
