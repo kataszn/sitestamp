@@ -36,14 +36,11 @@ export function ReportView({ visit }: { visit: VisitDTO }) {
   // Scroll the first highlighted evidence chip into view when a defect is selected
   useEffect(() => {
     if (selectedIndex === null || !evidenceRef.current) return;
-    const firstHighlighted = evidenceRef.current.querySelector<HTMLElement>(".evidence-chip.highlighted");
-    if (firstHighlighted) {
-      firstHighlighted.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      // Scroll a bit further so the chip isn't flush against the edge
-      setTimeout(() => {
-        window.scrollBy(0, 60);
-      }, 100);
-    }
+
+    evidenceRef.current.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   }, [selectedIndex]);
 
   // Get the media base URL by stripping '/v1' from the API base URL
@@ -79,6 +76,21 @@ export function ReportView({ visit }: { visit: VisitDTO }) {
       })
     : "N/A";
 
+  // Multimodal input summary for the title-block meta row
+  const photoCount = evidence.length;
+  const voiceNoteCount = evidence.filter((e) => e.noteSource === "VOICE").length;
+  const textNoteCount = evidence.filter((e) => e.noteSource === "TEXT").length;
+  const hasInspectorNotes = visit.notes != null || textNoteCount > 0;
+
+  const parts = [`${photoCount} Photo${photoCount === 1 ? "" : "s"}`];
+  if (voiceNoteCount > 0) {
+    parts.push(`${voiceNoteCount} Voice Note${voiceNoteCount === 1 ? "" : "s"}`);
+  }
+  if (hasInspectorNotes) {
+    parts.push("Inspector Notes");
+  }
+  const inputsSummary = parts.join(" • ");
+
   return (
     <div className="sheet">
       {/* Stale banner when report exists but visit is OPEN (regenerate was clicked) */}
@@ -112,6 +124,9 @@ export function ReportView({ visit }: { visit: VisitDTO }) {
           </span>
           <span>
             STATUS: <span className="status-pill">{visit.status}</span>
+          </span>
+          <span>
+            EVIDENCE: <b>{inputsSummary}</b>
           </span>
         </div>
       </div>
