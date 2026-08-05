@@ -30,8 +30,8 @@ export async function addEvidence(data: AddEvidence): Promise<Evidence | null> {
           create: {
             imageUrl: data.imageUrl,
             mimeType: data.mimeType,
-            caption: data.caption,
-            captionSource: data.captionSource,
+            note: data.note,
+            noteSource: data.noteSource,
           },
         },
       },

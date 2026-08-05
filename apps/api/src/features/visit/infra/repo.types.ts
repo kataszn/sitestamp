@@ -10,8 +10,8 @@ export type AddEvidence = {
   visitId: string;
   imageUrl: string;
   mimeType: string;
-  caption?: string;
-  captionSource?: 'TEXT' | 'VOICE';
+  note?: string;
+  noteSource?: 'TEXT' | 'VOICE';
 };
 
 export type SaveReport = {

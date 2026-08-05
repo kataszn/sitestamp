@@ -1,4 +1,4 @@
-import { CaptionSource } from "@sitestamp/shared";
+import { NoteSource } from "@sitestamp/shared";
 import { AppError, Errors } from "#core/errors";
 import { logger } from "#core/logger";
 import { catchAsync } from "#utils/catch-async";
@@ -40,7 +40,7 @@ export const addEvidence: RequestHandler = catchAsync(async (req, res) => {
 
   const evidence = await services.addEvidence({
     visitId: req.params.id as string,
-    caption: req.body.caption,
+    note: req.body.note,
     image,
     audio,
   });

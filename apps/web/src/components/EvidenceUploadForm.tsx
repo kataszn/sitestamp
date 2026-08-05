@@ -8,8 +8,8 @@ interface EvidenceUploadFormProps {
 export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload }) => {
   const { showToast } = useToast();
   const [image, setImage] = useState<File | null>(null);
-  const [captionMode, setCaptionMode] = useState<"text" | "audio">("text");
-  const [textCaption, setTextCaption] = useState("");
+  const [noteMode, setNoteMode] = useState<"text" | "audio">("text");
+  const [textNote, setTextNote] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
   // Audio recording state
@@ -94,24 +94,24 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
       const formData = new FormData();
       formData.append("image", image);
 
-      if (captionMode === "text" && textCaption.trim()) {
-        formData.append("caption", textCaption.trim());
-      } else if (captionMode === "audio" && audioBlob) {
+      if (noteMode === "text" && textNote.trim()) {
+        formData.append("note", textNote.trim());
+      } else if (noteMode === "audio" && audioBlob) {
         // Name must match swagger spec (which mentions 'audio' binary file field)
         const ext = audioBlob.type.includes("webm") ? "webm" : "wav";
-        formData.append("audio", audioBlob, `caption.${ext}`);
+        formData.append("audio", audioBlob, `note.${ext}`);
       }
 
       await onUpload(formData);
 
       // Reset Form State
       setImage(null);
-      setTextCaption("");
+      setTextNote("");
       setAudioBlob(null);
       setRecordingDuration(0);
       const fileInput = document.getElementById("evidenceImage") as HTMLInputElement;
       if (fileInput) fileInput.value = "";
-      showToast("Evidence uploaded successfully", "success");
+      showToast("✓ Evidence Added", "success");
     } catch (err) {
       console.error("Upload failed", err);
       showToast("Failed to upload evidence. Please try again.", "error");
@@ -127,7 +127,7 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
       </h3>
 
       <div className="form-group">
-        <label htmlFor="evidenceImage">Photo (Required) *</label>
+        <label htmlFor="evidenceImage">Photo *</label>
         <input
           id="evidenceImage"
           type="file"
@@ -140,62 +140,62 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
       </div>
 
       <div className="form-group" style={{ marginBottom: "12px" }}>
-        <label>Caption Method</label>
+        <label>Observation (Optional)</label>
         <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
           <button
             type="button"
             className="btn"
             style={{
               flex: 1,
-              background: captionMode === "text" ? "var(--blueprint)" : "var(--blueprint-soft)",
-              color: captionMode === "text" ? "var(--sheet)" : "var(--ink)",
+              background: noteMode === "text" ? "var(--blueprint)" : "var(--blueprint-soft)",
+              color: noteMode === "text" ? "var(--sheet)" : "var(--ink)",
             }}
-            onClick={() => setCaptionMode("text")}
+            onClick={() => setNoteMode("text")}
             disabled={isUploading}
           >
-            Text Caption
+            Text
           </button>
           <button
             type="button"
             className="btn"
             style={{
               flex: 1,
-              background: captionMode === "audio" ? "var(--blueprint)" : "var(--blueprint-soft)",
-              color: captionMode === "audio" ? "var(--sheet)" : "var(--ink)",
+              background: noteMode === "audio" ? "var(--blueprint)" : "var(--blueprint-soft)",
+              color: noteMode === "audio" ? "var(--sheet)" : "var(--ink)",
             }}
-            onClick={() => setCaptionMode("audio")}
+            onClick={() => setNoteMode("audio")}
             disabled={isUploading}
           >
-            Voice Caption
+            Voice
           </button>
         </div>
       </div>
 
-      {captionMode === "text" ? (
+      {noteMode === "text" ? (
         <div className="form-group">
-          <label htmlFor="textCaption">Text Caption</label>
+          <label htmlFor="textNote"></label>
           <input
-            id="textCaption"
+            id="textNote"
             type="text"
             className="form-control"
-            placeholder="e.g. Concrete spalling on bridge deck underside"
-            value={textCaption}
-            onChange={(e) => setTextCaption(e.target.value)}
+            placeholder="e.g. Observed concrete spalling beneath mid-span deck"
+            value={textNote}
+            onChange={(e) => setTextNote(e.target.value)}
             disabled={isUploading}
           />
         </div>
       ) : (
         <div className="form-group">
-          <label>Voice Caption</label>
+          <label></label>
           <div className="audio-recorder">
             {isRecording ? (
               <div className="recording-indicator">
                 <span className="dot" />
-                <span>Recording Voice Caption... ({recordingDuration}s)</span>
+                <span>Recording Voice Note... ({recordingDuration}s)</span>
               </div>
             ) : (
               <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "11px", color: "var(--steel)" }}>
-                {audioBlob ? "🎙️ Voice caption recorded successfully!" : "No voice caption recorded yet."}
+                {audioBlob ? "🎙️ Voice note recorded successfully!" : "No voice note recorded yet."}
               </div>
             )}
 
@@ -233,7 +233,7 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
           style={{ width: "100%" }}
           disabled={isUploading || !image}
         >
-          {isUploading ? "Uploading Evidence..." : "Add Evidence"}
+          {isUploading ? "Uploading Evidence..." : "Save Evidence"}
         </button>
       </div>
     </form>

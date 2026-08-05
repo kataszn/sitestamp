@@ -572,7 +572,7 @@ body {
   animation-delay: 0.3s;
 }
 
-.generation-caption {
+.generation-note {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
@@ -584,7 +584,7 @@ body {
   color: var(--steel);
 }
 
-.generation-caption span {
+.generation-note span {
   border: 1px solid var(--line);
   background: var(--sheet);
   padding: 4px 8px;

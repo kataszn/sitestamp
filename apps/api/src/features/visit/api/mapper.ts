@@ -5,8 +5,8 @@ const toEvidenceDTO = (evidence: Evidence): EvidenceDTO => ({
   id: evidence.id,
   imageUrl: evidence.imageUrl,
   mimeType: evidence.mimeType,
-  caption: evidence.caption,
-  captionSource: evidence.captionSource as EvidenceDTO['captionSource'],
+  note: evidence.note,
+  noteSource: evidence.noteSource as EvidenceDTO['noteSource'],
 });
 
 const toReportDTO = (report: Report): ReportDTO => {

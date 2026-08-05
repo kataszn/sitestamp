@@ -156,7 +156,7 @@ export const VisitDetailPage: React.FC = () => {
           {/* List of current evidence */}
           <div className="card">
             <h3 style={{ fontFamily: "Space Grotesk, sans-serif", fontSize: "16px", margin: "0 0 14px" }}>
-              Evidence Collected ({visit.evidence.length})
+              Inspection Evidence ({visit.evidence.length})
             </h3>
 
             {visit.evidence.length === 0 ? (
@@ -181,16 +181,16 @@ export const VisitDetailPage: React.FC = () => {
                     >
                       <img
                         src={getMediaUrl(item.imageUrl)}
-                        alt={item.caption || "Evidence"}
+                        alt={item.note || "Evidence"}
                         style={{ width: "60px", height: "60px", objectFit: "cover", border: "1px solid var(--line)" }}
                       />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ margin: "0 0 4px", fontSize: "14px", fontWeight: "500" }}>
-                          {item.caption || <span style={{ color: "var(--steel)", fontStyle: "italic" }}>No caption</span>}
+                          {item.note || <span style={{ color: "var(--steel)", fontStyle: "italic" }}>No observation</span>}
                         </p>
-                        {item.caption && (
+                        {item.note && (
                           <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "10.5px", color: "var(--steel)" }}>
-                            Source: {item.captionSource === "VOICE" ? "🎙️ Voice" : "📝 Text"}
+                            {item.noteSource === "VOICE" ? "🎙️ Voice Note" : "📝 Text Note"}
                           </div>
                         )}
                       </div>
@@ -313,15 +313,15 @@ export const VisitDetailPage: React.FC = () => {
           >
             <img
               src={getMediaUrl(item.imageUrl)}
-              alt={item.caption || "Evidence"}
+              alt={item.note || "Evidence"}
               style={{
                 maxWidth: "100%",
-                maxHeight: item.caption ? "75vh" : "85vh",
+                maxHeight: item.note ? "75vh" : "85vh",
                 objectFit: "contain",
                 borderRadius: "4px",
               }}
             />
-            {item.caption && (
+            {item.note && (
               <p
                 style={{
                   margin: 0,
@@ -332,7 +332,7 @@ export const VisitDetailPage: React.FC = () => {
                   maxWidth: "600px",
                 }}
               >
-                {item.caption}
+                {item.note}
               </p>
             )}
           </div>
