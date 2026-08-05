@@ -197,7 +197,7 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
         }}
       >
         <span style={{ flex: 1, height: "1px", background: "var(--line)" }} />
-        Prefer speaking instead?
+        OR
         <span style={{ flex: 1, height: "1px", background: "var(--line)" }} />
       </div>
 
