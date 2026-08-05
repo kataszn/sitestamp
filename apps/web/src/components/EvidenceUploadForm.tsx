@@ -8,19 +8,21 @@ interface EvidenceUploadFormProps {
 export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload }) => {
   const { showToast } = useToast();
   const [image, setImage] = useState<File | null>(null);
-  const [noteMode, setNoteMode] = useState<"text" | "audio">("text");
   const [textNote, setTextNote] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
   // Audio recording state
   const [isRecording, setIsRecording] = useState(false);
   const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const durationIntervalRef = useRef<number | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -56,6 +58,7 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
         const blobType = recorder.mimeType || "audio/wav";
         const finalBlob = new Blob(chunksRef.current, { type: blobType });
         setAudioBlob(finalBlob);
+        setAudioUrl(URL.createObjectURL(finalBlob));
       };
 
       recorder.start();
@@ -85,6 +88,30 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
     setIsRecording(false);
   };
 
+  const handlePlay = () => {
+    if (!audioUrl) return;
+    if (audioRef.current) {
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
+  };
+
+  const handleDeleteAudio = () => {
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+    }
+    setAudioBlob(null);
+    setAudioUrl(null);
+    setRecordingDuration(0);
+    setIsPlaying(false);
+  };
+
+  const formatDuration = (seconds: number) => {
+    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
+    const s = (seconds % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!image) return;
@@ -94,12 +121,13 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
       const formData = new FormData();
       formData.append("image", image);
 
-      if (noteMode === "text" && textNote.trim()) {
-        formData.append("note", textNote.trim());
-      } else if (noteMode === "audio" && audioBlob) {
+      // Audio takes precedence over text when both are present
+      if (audioBlob) {
         // Name must match swagger spec (which mentions 'audio' binary file field)
         const ext = audioBlob.type.includes("webm") ? "webm" : "wav";
         formData.append("audio", audioBlob, `note.${ext}`);
+      } else if (textNote.trim()) {
+        formData.append("note", textNote.trim());
       }
 
       await onUpload(formData);
@@ -108,7 +136,10 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
       setImage(null);
       setTextNote("");
       setAudioBlob(null);
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      setAudioUrl(null);
       setRecordingDuration(0);
+      setIsPlaying(false);
       const fileInput = document.getElementById("evidenceImage") as HTMLInputElement;
       if (fileInput) fileInput.value = "";
       showToast("✓ Evidence Added", "success");
@@ -139,92 +170,131 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
         />
       </div>
 
-      <div className="form-group" style={{ marginBottom: "12px" }}>
-        <label>Observation (Optional)</label>
-        <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
-          <button
-            type="button"
-            className="btn"
-            style={{
-              flex: 1,
-              background: noteMode === "text" ? "var(--blueprint)" : "var(--blueprint-soft)",
-              color: noteMode === "text" ? "var(--sheet)" : "var(--ink)",
-            }}
-            onClick={() => setNoteMode("text")}
-            disabled={isUploading}
-          >
-            Text
-          </button>
-          <button
-            type="button"
-            className="btn"
-            style={{
-              flex: 1,
-              background: noteMode === "audio" ? "var(--blueprint)" : "var(--blueprint-soft)",
-              color: noteMode === "audio" ? "var(--sheet)" : "var(--ink)",
-            }}
-            onClick={() => setNoteMode("audio")}
-            disabled={isUploading}
-          >
-            Voice
-          </button>
-        </div>
+      <div className="form-group">
+        <label htmlFor="textNote">Observation (Optional)</label>
+        <input
+          id="textNote"
+          type="text"
+          className="form-control"
+          placeholder="e.g. Observed concrete spalling beneath mid-span deck"
+          value={textNote}
+          onChange={(e) => setTextNote(e.target.value)}
+          disabled={isUploading}
+        />
       </div>
 
-      {noteMode === "text" ? (
-        <div className="form-group">
-          <label htmlFor="textNote"></label>
-          <input
-            id="textNote"
-            type="text"
-            className="form-control"
-            placeholder="e.g. Observed concrete spalling beneath mid-span deck"
-            value={textNote}
-            onChange={(e) => setTextNote(e.target.value)}
-            disabled={isUploading}
-          />
-        </div>
-      ) : (
-        <div className="form-group">
-          <label></label>
-          <div className="audio-recorder">
-            {isRecording ? (
-              <div className="recording-indicator">
-                <span className="dot" />
-                <span>Recording Voice Note... ({recordingDuration}s)</span>
-              </div>
-            ) : (
-              <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "11px", color: "var(--steel)" }}>
-                {audioBlob ? "🎙️ Voice note recorded successfully!" : "No voice note recorded yet."}
-              </div>
-            )}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          margin: "4px 0 12px",
+          color: "var(--steel)",
+          fontFamily: "IBM Plex Mono, monospace",
+          fontSize: "11px",
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+        }}
+      >
+        <span style={{ flex: 1, height: "1px", background: "var(--line)" }} />
+        Prefer speaking instead?
+        <span style={{ flex: 1, height: "1px", background: "var(--line)" }} />
+      </div>
 
-            <div style={{ display: "flex", gap: "8px" }}>
-              {!isRecording ? (
+      <div className="form-group">
+        <div className="audio-recorder">
+          {isRecording ? (
+            <div className="recording-indicator">
+              <span className="dot" />
+              <span>Recording... ({recordingDuration}s)</span>
+            </div>
+          ) : audioBlob ? (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                <span style={{ fontSize: "16px" }}>✓</span>
+                <span style={{ fontFamily: "Space Grotesk, sans-serif", fontSize: "14px", fontWeight: 600 }}>
+                  Voice note added
+                </span>
+                <span
+                  style={{
+                    marginLeft: "auto",
+                    fontFamily: "IBM Plex Mono, monospace",
+                    fontSize: "12px",
+                    color: "var(--steel)",
+                  }}
+                >
+                  {formatDuration(recordingDuration)}
+                </span>
+              </div>
+
+              <div style={{ display: "flex", gap: "8px" }}>
                 <button
                   type="button"
                   className="btn"
                   style={{ background: "var(--blueprint)" }}
-                  onClick={startRecording}
+                  onClick={handlePlay}
                   disabled={isUploading}
                 >
-                  Record
+                  {isPlaying ? "Playing..." : "Play"}
                 </button>
-              ) : (
                 <button
                   type="button"
                   className="btn"
-                  style={{ background: "var(--critical)" }}
-                  onClick={stopRecording}
+                  style={{ background: "transparent", color: "var(--critical)", border: "1.5px solid var(--critical)" }}
+                  onClick={handleDeleteAudio}
                   disabled={isUploading}
                 >
-                  Stop
+                  Delete
                 </button>
-              )}
+              </div>
+
+              <div style={{ marginTop: "10px", fontFamily: "IBM Plex Mono, monospace", fontSize: "11px", color: "var(--steel)" }}>
+                The voice note will be transcribed automatically.
+              </div>
             </div>
-          </div>
+          ) : (
+            <div>
+              <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "11px", color: "var(--steel)", marginBottom: "10px" }}>
+                No voice note added
+              </div>
+              <button
+                type="button"
+                className="btn"
+                style={{ background: "var(--blueprint)" }}
+                onClick={startRecording}
+                disabled={isUploading}
+              >
+                Record Voice
+              </button>
+            </div>
+          )}
+
+          {isRecording && (
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                type="button"
+                className="btn"
+                style={{ background: "var(--critical)" }}
+                onClick={stopRecording}
+                disabled={isUploading}
+              >
+                Stop
+              </button>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Hidden audio element for playback */}
+        {audioUrl && (
+          <audio
+            ref={audioRef}
+            src={audioUrl}
+            onEnded={() => setIsPlaying(false)}
+            onPause={() => setIsPlaying(false)}
+            style={{ display: "none" }}
+          />
+        )}
+      </div>
 
       <div style={{ marginTop: "20px" }}>
         <button
