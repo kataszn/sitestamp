@@ -92,8 +92,8 @@ export const generateReport = async (visitId: string): Promise<ReportDTO> => {
       rawModelJson: raw,
     });
   } catch (error) {
-    // Reset the status so the job isn't permanently stuck in "GENERATING"
-    await repo.updateStatus(visitId, "OPEN");
+    // Set visit status to FAILED and store the error message
+    await repo.markVisitFailed(visitId, error instanceof Error ? error.message : String(error));
     throw error;
   }
 

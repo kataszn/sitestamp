@@ -5,9 +5,10 @@ export interface VisitDTO {
   siteName: string;
   inspectorName: string;
   notes: string | null;
-  status: 'OPEN' | 'GENERATING' | 'COMPLETE';
+  status: 'OPEN' | 'GENERATING' | 'COMPLETE' | 'FAILED';
   evidence: EvidenceDTO[];
   report: ReportDTO | null;
+  lastError: string | null;
 
   createdAt: string;
 }

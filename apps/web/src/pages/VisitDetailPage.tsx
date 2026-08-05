@@ -76,6 +76,19 @@ export const VisitDetailPage: React.FC = () => {
     });
   };
 
+  const handleRetryReport = async () => {
+    if (!visit) return;
+    setIsGenerating(true);
+    navigate(`/visits/${id}/report?generate=1`);
+
+    void fetch(`${apiBase}/visits/${id}/report`, {
+      method: "POST",
+    }).catch((err) => {
+      console.error(err);
+      showToast("Failed to retry report generation. Check if the AI models are configured.", "error");
+    });
+  };
+
   const handleRemoveEvidence = async (evidenceId: string) => {
     try {
       const response = await fetch(`${apiBase}/visits/evidence/${evidenceId}/remove`, {
@@ -119,6 +132,15 @@ export const VisitDetailPage: React.FC = () => {
             <span className="status-pill">{visit.status}</span>
           </div>
         </div>
+
+        {visit.status === "FAILED" && (
+          <div className="review-banner" style={{ marginBottom: "20px" }}>
+            Report generation failed: {visit.lastError ?? "unknown error"}.{" "}
+            <button className="inline-link" onClick={handleRetryReport} disabled={isGenerating}>
+              Try again
+            </button>
+          </div>
+        )}
 
         {visit.notes && (
           <div className="card" style={{ background: "var(--blueprint-soft)", borderLeft: "3px solid var(--blueprint)" }}>

@@ -124,3 +124,10 @@ export async function removeEvidence(evidenceId: string): Promise<void> {
     where: { id: evidenceId },
   });
 }
+
+export async function markVisitFailed(id: string, error: string) {
+  return DB.visit.update({
+    where: { id },
+    data: { status: "FAILED" as Visit["status"], lastError: error },
+  });
+}

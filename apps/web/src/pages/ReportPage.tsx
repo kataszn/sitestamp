@@ -42,7 +42,7 @@ export const ReportPage: React.FC = () => {
 
   useEffect(() => {
     const shouldPoll = generateRequested || visit?.status === "GENERATING";
-    if (!shouldPoll || visit?.status === "COMPLETE") {
+    if (!shouldPoll || visit?.status === "COMPLETE" || visit?.status === "FAILED") {
       return;
     }
 
@@ -55,7 +55,19 @@ export const ReportPage: React.FC = () => {
     };
   }, [generateRequested, visit?.status, fetchVisit]);
 
-  const showGeneratingView = generateRequested || visit?.status === "GENERATING";
+  const showGeneratingView =
+    (generateRequested || visit?.status === "GENERATING") && visit?.status !== "FAILED";
+
+  const handleRetry = async () => {
+    try {
+      await fetch(`${apiBase}/visits/${id}/report`, { method: "POST" });
+    } catch (err) {
+      console.error("Failed to retry report generation", err);
+    }
+    // Redirect to the visit details page (same flow as regenerate) so the
+    // page mounts fresh and reflects the current status reliably.
+    navigate(`/visits/${id}`);
+  };
 
   const [captionStep, setCaptionStep] = useState(0);
   const steps = ["Loading evidence", "Analyzing images", "Writing report"];
@@ -120,7 +132,46 @@ export const ReportPage: React.FC = () => {
     </div>
   );
 
+  const renderFailedView = () => (
+    <div className="report-page">
+      <div className="sheet" style={{ padding: "44px 28px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "16px", marginBottom: "20px" }}>
+          <div>
+            <Link to={visit ? `/visits/${visit.id}` : "/"} className="link">
+              ← Back to Visit
+            </Link>
+            <h1 style={{ fontFamily: "Space Grotesk, sans-serif", fontSize: "28px", margin: "8px 0 4px" }}>
+              {visit?.siteName || "Report generation failed"}
+            </h1>
+            <p style={{ margin: 0, fontFamily: "IBM Plex Mono, monospace", fontSize: "12px", color: "var(--steel)" }}>
+              {visit ? <>Inspector: <b>{visit.inspectorName}</b> · Visit #{visit.id}</> : "Report generation failed"}
+            </p>
+          </div>
+          <div>
+            <span className="status-pill">FAILED</span>
+          </div>
+        </div>
+
+        <div className="review-banner" style={{ marginBottom: "20px" }}>
+          Report generation failed: {visit?.lastError ?? "unknown error"}.
+        </div>
+
+        <div style={{ textAlign: "center", padding: "12px 0 4px" }}>
+          <p style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "12.5px", color: "var(--steel)", margin: "0 0 20px" }}>
+            The AI model could not complete the report. You can try again, or go back to review your evidence.
+          </p>
+          <button className="btn" onClick={handleRetry}>
+            Try again
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   if (isLoading) {
+    if (visit?.status === "FAILED") {
+      return renderFailedView();
+    }
     if (showGeneratingView) {
       return renderGeneratingView();
     }
@@ -128,6 +179,9 @@ export const ReportPage: React.FC = () => {
   }
 
   if (error || !visit) {
+    if (visit?.status === "FAILED") {
+      return renderFailedView();
+    }
     if (showGeneratingView) {
       return renderGeneratingView();
     }
@@ -137,6 +191,10 @@ export const ReportPage: React.FC = () => {
         <Link to="/" className="link">Start New Visit</Link>
       </div>
     );
+  }
+
+  if (visit.status === "FAILED") {
+    return renderFailedView();
   }
 
   if (showGeneratingView) {

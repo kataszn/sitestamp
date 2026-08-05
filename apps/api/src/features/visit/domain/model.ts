@@ -5,9 +5,10 @@ export interface Visit {
   siteName: string;
   inspectorName: string;
   notes: string | null;
-  status: 'OPEN' | 'GENERATING' | 'COMPLETE';
+  status: 'OPEN' | 'GENERATING' | 'COMPLETE' | 'FAILED';
   evidence: Evidence[];
   report?: Report | null;
+  lastError: string | null;
 
   createdAt: Date;
 }
