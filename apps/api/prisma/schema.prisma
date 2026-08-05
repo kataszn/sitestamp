@@ -16,6 +16,8 @@ model Visit {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
+  lastError String?
+
   evidence Evidence[]
   report   Report?
 }
@@ -24,6 +26,7 @@ enum VisitStatus {
   OPEN // still collecting evidence
   GENERATING // report submission in flight
   COMPLETE
+  FAILED
 }
 
 model Evidence {

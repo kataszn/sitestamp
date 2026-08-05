@@ -48,6 +48,7 @@ export function toDomain(record: any): Visit {
     inspectorName: String(normalized.inspectorName),
     notes: normalized.notes ?? null,
     status: normalized.status,
+    lastError: normalized.lastError ?? null,
     createdAt: normalized.createdAt instanceof Date ? normalized.createdAt : new Date(normalized.createdAt),
     evidence: Array.isArray(normalized.evidence) ? normalized.evidence.map(toDomainEvidence) : [],
     report: normalized.report ? toDomainReport(normalized.report) : null,
