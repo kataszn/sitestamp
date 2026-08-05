@@ -1,5 +1,4 @@
 import path from "node:path";
-import fs from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 
 import type {
@@ -16,6 +15,7 @@ import * as gemma from "#features/visit/infra/gemma.client";
 import { ENV } from "#core/env";
 import type { CreateVisitInput, AddEvidenceInput } from "./types";
 import { transcribeAudio } from "#features/visit/infra/gemma.client";
+import { storage } from "#features/visit/infra/storage";
 
 export const createVisit = async (input: CreateVisitInput): Promise<VisitDTO> => {
   const visit = await repo.create(input);
@@ -27,18 +27,17 @@ export const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO>
   let captionSource: CaptionSource | null = input.caption ? 'TEXT' : null;
   let caption = input.caption;
 
-  // audio: never touches disk, buffer goes straight to transcription and is discarded
+  // audio: never saved, transcribed to text and replaces text note
   if (audio) {
     const audioCaption = await transcribeAudio(audio.buffer, audio.mimetype);
     caption = audioCaption;
     captionSource = 'VOICE';
   }
 
-  // image: write buffer to disk, we need it to persist for the report + Gemma call
+  // image: save to storage
   const ext = path.extname(image.originalname) || '.jpg';
   const filename = `${caption || randomUUID()}-${ext}`;
-  await fs.writeFile(path.join(ENV.UPLOAD_DIR, filename), image.buffer);
-  const imageUrl = `/uploads/${filename}`;
+  const imageUrl = await storage.save(image.buffer, filename, image.mimetype);
   
 
   const evidence = await repo.addEvidence({
@@ -74,10 +73,7 @@ export const generateReport = async (visitId: string): Promise<ReportDTO> => {
 
     const evidenceInputs = await Promise.all(
       visit.evidence.map(async (e) => {
-        const filename = path.basename(e.imageUrl);
-        const imageBuffer = await fs.readFile(
-          path.join(ENV.UPLOAD_DIR, filename)
-        );
+        const imageBuffer = await storage.read(e.imageUrl);
         return { imageBuffer, mimeType: e.mimeType, caption: e.caption };
       })
     );
