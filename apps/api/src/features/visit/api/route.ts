@@ -4,6 +4,7 @@ import validate from "#middlewares/validate";
 import * as handlers from "#features/visit/api/handlers";
 import * as schemas from "#features/visit/api/schemas.js";
 import { evidenceUpload } from "#middlewares/upload";
+import { reportGenerationLimiter } from "#middlewares/ratelimit";
 
 const router: Router = Router({ mergeParams: true });
 
@@ -20,7 +21,12 @@ router.post(
 
 router.get("/:id", validate(schemas.idParam), handlers.getVisit);
 
-router.post("/:id/report", validate(schemas.generateReport), handlers.generateReport);
+router.post(
+  "/:id/report",
+  validate(schemas.generateReport),
+  reportGenerationLimiter,
+  handlers.generateReport
+);
 
 router.get("/:id/report", validate(schemas.idParam), handlers.getReport);
 
