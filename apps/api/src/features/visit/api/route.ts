@@ -2,31 +2,31 @@ import { Router } from "express";
 
 import validate from "#middlewares/validate";
 import * as handlers from "#features/visit/api/handlers";
-import { schema } from "@sitestamp/shared";
+import * as schemas from "#features/visit/api/schemas.js";
 import { evidenceUpload } from "#middlewares/upload";
 
 const router: Router = Router({ mergeParams: true });
 
-router.post("/", validate(schema.createVisit), handlers.createVisit);
+router.post("/", validate(schemas.createVisit), handlers.createVisit);
 
 router.get("/", handlers.getAllVisits);
 
 router.post(
   "/:id/evidence",
   evidenceUpload,
-  validate(schema.addEvidence),
+  validate(schemas.addEvidence),
   handlers.addEvidence
 );
 
-router.get("/:id", validate(schema.idParam), handlers.getVisit);
+router.get("/:id", validate(schemas.idParam), handlers.getVisit);
 
-router.post("/:id/report", validate(schema.generateReport), handlers.generateReport);
+router.post("/:id/report", validate(schemas.generateReport), handlers.generateReport);
 
-router.get("/:id/report", validate(schema.idParam), handlers.getReport);
+router.get("/:id/report", validate(schemas.idParam), handlers.getReport);
 
-router.post("/:id/status", validate(schema.updateStatus), handlers.updateStatus);
+router.post("/:id/status", validate(schemas.updateStatus), handlers.updateStatus);
 
-router.post("/evidence/:id/remove", validate(schema.idParam), handlers.removeEvidence);
+router.post("/evidence/:id/remove", validate(schemas.idParam), handlers.removeEvidence);
 
 
 export default router;

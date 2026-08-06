@@ -1,4 +1,3 @@
-// domain/tools.ts
 import { Type } from '@google/genai';
 
 export const getSiteHistoryTool = {

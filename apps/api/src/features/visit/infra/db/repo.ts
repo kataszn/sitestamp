@@ -3,8 +3,8 @@ import { isPrismaNotFound, PrismaClientError } from '#utils/prisma';
 
 import { DB } from "#core/db";
 import { Evidence, Report, Visit } from "#features/visit/domain/model";
-import type { SiteHistoryEntry } from '#features/visit/domain/agent.tools';
-import * as mapper from "#features/visit/infra/repo.mapper";
+import type { SiteHistoryEntry } from '#features/visit/domain/ai/agent.tools.js';
+import * as mapper from "#features/visit/infra/db/repo.mapper.js";
 import { TrendPoint } from "@sitestamp/shared";
 
 export async function create(data: CreateVisit): Promise<Visit> {

@@ -10,12 +10,11 @@ import type {
   NoteSource,
 } from "@sitestamp/shared";
 import { AppError, Errors } from "#core/errors";
-import * as repo from "#features/visit/infra/repo";
+import * as repo from "#features/visit/infra/db/repo";
 import * as mapper from "#features/visit/api/mapper";
-import * as gemma from "#features/visit/infra/gemma.client";
-import type { CreateVisitInput, AddEvidenceInput } from "./types";
-import { transcribeAudio } from "#features/visit/infra/gemma.client";
+import * as gemma from "#features/visit/infra/ai/gemma.client";
 import { storage } from "#features/visit/infra/storage";
+import type { CreateVisitInput, AddEvidenceInput } from "./types";
 
 export const createVisit = async (input: CreateVisitInput): Promise<VisitDTO> => {
   const visit = await repo.create(input);
@@ -29,7 +28,7 @@ export const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO>
 
   // audio: never saved, transcribed to text and replaces text note
   if (audio) {
-    const audioNote = await transcribeAudio(audio.buffer, audio.mimetype);
+    const audioNote = await gemma.transcribeAudio(audio.buffer, audio.mimetype);
     note = audioNote;
     noteSource = 'VOICE';
   }

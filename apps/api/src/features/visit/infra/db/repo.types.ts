@@ -1,4 +1,4 @@
-import { DefectData, ReportData, Severity } from "@sitestamp/shared";
+import { ReportData } from "#features/visit/infra/ai/report.schema";
 
 export type CreateVisit = {
   siteName: string;
