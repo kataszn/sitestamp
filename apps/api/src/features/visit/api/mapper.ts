@@ -26,6 +26,7 @@ const toReportDTO = (report: Report): ReportDTO => {
 const toVisitDTO = (visit: Visit): VisitDTO => ({
   id: visit.id,
   siteName: visit.siteName,
+  assetCode: visit.assetCode,
   inspectorName: visit.inspectorName,
   notes: visit.notes,
   status: visit.status,

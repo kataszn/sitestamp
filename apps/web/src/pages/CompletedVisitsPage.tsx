@@ -94,6 +94,7 @@ export const CompletedVisitsPage: React.FC = () => {
                     {visit.siteName}
                   </div>
                   <div className="meta-row" style={{ gap: "12px", fontSize: "11.5px" }}>
+                    {visit.assetCode && <span>Asset: <b>{visit.assetCode}</b></span>}
                     <span>Inspector: <b>{visit.inspectorName}</b></span>
                     {visit.notes && <span>· {visit.notes}</span>}
                     <span>· {new Date(visit.createdAt).toLocaleDateString()}</span>

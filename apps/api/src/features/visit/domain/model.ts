@@ -3,6 +3,7 @@ import { Severity } from "@sitestamp/shared";
 export interface Visit {
   id: string;
   siteName: string;
+  assetCode: string | null;
   inspectorName: string;
   notes: string | null;
   status: 'OPEN' | 'GENERATING' | 'COMPLETE' | 'FAILED';

@@ -1,6 +1,7 @@
 export interface CreateVisitInput {
   siteName: string;
   inspectorName: string;
+  assetCode?: string;
   notes?: string;
 }
 
