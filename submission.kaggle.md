@@ -1,105 +1,101 @@
-# SiteStamp: Multimodal Field Inspection Reports, Grounded in Evidence
+# SiteStamp - Trustworthy AI for Public Infrastructure Inspection
+**Team**: kataszn
+**Track:** GenAI for Good
+**Repository:** https://github.com/kataszn/sitestamp
+**Live demo:** https://sitestamp-web.vercel.app/
+**Models:** Gemma 4 31B (`gemma-4-31b-it`) + Gemini 3.6 Flash (voice transcription)
 
-### A Gemma 4-powered assistant that turns photos, notes, and voice memos from a site visit into a structured, defensible inspection report — with every finding traceable back to the supporting evidence.
+---
+## What is SiteStamp?
+
+SiteStamp is an AI inspection assistant for civil engineers and public works inspectors. It transforms a complete inspection site visit into a structured engineering report with traceable findings, severity assessment, and repair recommendations. Every defect is linked back to the evidence that supports it, allowing engineers to verify AI-generated conclusions instead of simply trusting them.
 
 ## The Problem
 
-Infrastructure inspection is a judgment-heavy, paper-heavy process. A field engineer visits a site — a bridge, a culvert, a stretch of road — and has to synthesize scattered evidence (photos taken in the moment, handwritten or verbal notes, prior knowledge of the site) into a coherent assessment: what's wrong, how bad is it, what should happen next. In low-connectivity environments common across Nigerian infrastructure work, this synthesis often happens hours or days after the visit, from memory, against a blank report template.
+Public infrastructure, including bridges, culverts, and roads, depends on inspection to stay safe, and inspection capacity is the real bottleneck. A field engineer visits a site and has to synthesize scattered evidence, including photos taken in the moment, handwritten or verbal notes, and prior knowledge of the site, into a coherent assessment: what's wrong, how bad is it, and what should happen next. In low connectivity environments common across infrastructure inspection work, this synthesis often happens hours or days after the visit, from memory, against a blank report template, turning civic maintenance into a process that runs on inconsistent, hard to verify paperwork.
 
-Two things make this hard to do well and consistently:
+The core interaction is a session, not a chat. An inspector opens a Visit, uploads evidence as they walk the site, a photo plus optionally either a text or voice note, and when the visit is done, triggers a single "Generate Report" call. That one call sends the full evidence set to Gemma 4 in a single multimodal request and returns a structured report: overall severity, an executive summary, individual defect findings, engineering recommendations, and the supporting evidence for each. This single batched call is deliberate, not a chattier multi-turn loop: it keeps cost and latency bounded to one synthesis call per visit, and it lets Gemma reason over the whole body of evidence at once, the way a human inspector actually would, recognizing that spalling on two piers plus a blocked drain together point to one systemic water-management problem rather than three unrelated issues.
 
-1. **Evidence lives in fragments.** Three photos and a mumbled voice note about water damage don't assemble themselves into "this bridge has an active water-ingress problem with an expansion-joint failure downstream of it." That synthesis is manual, slow, and varies with how tired the inspector is that day.
-2. **Trust requires traceability.** A report that says "critical spalling observed" is only useful if someone can verify *which* photo that claim is based on. Most digital inspection tools either skip this link entirely or make it a manual tagging chore.
+## Why Gemma 4?
 
-SiteStamp addresses both: it collects evidence the way an inspector naturally gathers it — multiple photos, optional typed or spoken notes, free-text notes — and produces one synthesized report where every defect is clickable back to its source photo. The goal is not to replace engineers, but to reduce documentation effort while producing more consistent, traceable reports.
+The decisive question: why not just paste photos into a general chatbot?
 
-## Our Solution
+Because a maintenance authority isn't going to allocate emergency budget off a chat transcript. They need something closer to a report: structured, consistent, and checkable. That means the model output has to be constrained and validated, not free text, and every claim needs a traceable source. That's a synthesis and reliability problem, not a conversation, and it's what SiteStamp is built around.
 
-The core interaction is a **session, not a chat**. An inspector opens a Visit, uploads evidence as they walk the site (a photo plus optionally either a text or voice note), and when the visit is done, triggers a single "Generate Report" call. That one call sends the full evidence set — every photo, every evidence note, any site notes — to Gemma 4 in a single multimodal request, and gets back a structured report: overall severity, an executive summary, individual defect findings, engineering recommendations, and the supporting evidence for each.
+We chose Gemma 4 31B specifically because:
 
-Each reported defect can be selected to automatically highlight and scroll to the evidence that supports it, improving transparency and making it easier for engineers to validate AI-generated conclusions.
+- **It reasons over the whole evidence set at once**, recognizing systemic problems across photos rather than captioning them in isolation.
+- **It supports schema-constrained generation.** Gemma can be required to return a specific JSON shape, not prose we'd have to parse heuristically.
+- **It's honest under the right prompt.** With the right instruction, it sets a review flag instead of guessing when evidence is ambiguous, rather than fabricating a confident answer.
 
-This "batch collect, synthesize once" pattern was a deliberate choice over a chattier, multi-turn agent loop. It keeps cost and latency bounded to one call per visit, and — most importantly — it lets Gemma reason over the *whole* body of evidence at once, the way a human inspector actually would, recognizing that spalling on two different piers plus a blocked drain together indicate one systemic water-management problem, not three unrelated issues.
+## Architecture: The Split of Responsibility
 
----
+The core design decision: **deterministic code owns storage, files, and traceability; Gemma owns synthesis and judgment.**
 
-## Gemma 4 Integration
+What deterministic code does (never the model):
+- Store evidence, visit metadata, and completed reports
+- Resolve Gemma's photo-index references back to real evidence records for the UI
+- Validate every model response against a Zod schema before it's ever persisted
+- Enforce the "one synthesis call per inspection session" pattern, with no chattier multi-turn loop
+- Render the report and drive the click-to-evidence interaction
 
-Gemma 4, specifically `gemma-4-31b-it`, is the synthesis engine the entire product exists to showcase.
+What Gemma does (only the model can):
+- Synthesize multiple photos, notes, and voice transcripts into one coherent assessment
+- Assign defect type, location, severity, and a recommendation
+- Decide, per finding, which submitted photos support it
+- Flag its own uncertainty when evidence is insufficient
 
-**Multimodal synthesis.** `generateReport` sends every evidence photo as inline image data alongside a prompt built from the site name, inspector notes, and each photo's evidence note (typed or transcribed from voice) to `gemma-4-31b-it`. The response is constrained using the Gemini API's `responseSchema` mechanism — Gemma must return a specific JSON shape (summary, severity enum, typed defect array, recommendation, boolean review flag) rather than free text we'd have to parse heuristically. We additionally validate every response through a Zod schema on the backend as an independent check — schema-constrained generation reduces malformed output but doesn't guarantee it, and a hackathon demo is the wrong place to discover that the hard way.
+This split means the UI is never raw model text, and evidence citations are never left to the model's memory of an opaque ID, as explained below.
 
-**Self-reported uncertainty.** The prompt explicitly instructs Gemma to set `needsReview: true` rather than guess when evidence is ambiguous or insufficient. In testing, this worked exactly as intended — one report noted it couldn't confirm the condition of cable saddles because no photo showed them, and flagged itself for review instead of fabricating a finding. This mattered enough to become a first-class UI element: flagged reports get a visible banner, not a buried field.
+## Technical Implementation
 
-**Evidence-to-defect grounding.** The most technically interesting piece: each defect includes the *indices* of the photos that support it (`evidenceIndices: number[]`), which the frontend resolves to real evidence IDs to highlight the corresponding photo on click. We initially had Gemma emit real database IDs (opaque CUID strings) directly into the defect list, and this measurably degraded JSON reliability — reproducing random-looking string identifiers correctly inside a nested array is a much harder generation target than it looks. Switching to small integer indices, resolved to real IDs in a deterministic backend step after generation, fixed this entirely while preserving full traceability. It's a good example of designing *around* a model's actual failure modes rather than fighting them with a longer prompt — a fix only found by building the feature end-to-end and watching it break first.
+**Multimodal synthesis.** Every evidence photo goes to `gemma-4-31b-it` as inline image data, alongside a prompt built from the site name, inspector notes, and each photo's note (typed or transcribed from voice). The response is constrained via the Gemini API's `responseSchema` mechanism and independently re-validated with Zod on the backend. Schema-constrained generation reduces malformed output but doesn't guarantee it, and a live demo is the wrong place to find that out.
 
-**Two models, two jobs.** Voice notes are transcribed via `gemini-3.6-flash`, not Gemma — because audio input on Gemma 4 is only wired up in the E2B/E4B edge-deployment variants, distributed for local/on-device inference (Hugging Face Transformers, Ollama, LiteRT) and not exposed through the hosted Gemini API this project runs on. We discovered this from a live `400 INVALID_ARGUMENT: Audio input modality is not enabled for this model` response against `gemma-4-31b-it`, confirmed against Google's own Gemma capability documentation. Rather than dropping the voice-note feature, we routed transcription to a model actually built for that input, keeping Gemma 4 responsible for 100% of the multimodal reasoning over the assembled evidence — the task it's strongest at. We see this as a more honest architecture than forcing one model to do a job it isn't built for.
+**Evidence-to-defect grounding.** Each defect includes the *indices* of the photos supporting it, resolved by the backend to real evidence IDs for the click-to-highlight interaction. The first version had Gemma emit real database IDs (opaque CUID strings) directly, and this measurably degraded JSON reliability, since reproducing random-looking string identifiers correctly inside a nested array is a much harder generation target than it looks. Switching to small integer indices, resolved server-side, fixed this entirely while preserving full traceability.
 
----
+**Self-reported uncertainty.** The prompt explicitly instructs Gemma to set `needsReview: true` rather than guess when evidence is ambiguous. In testing, this fired correctly. One report flagged that it couldn't confirm the condition of cable saddles because no photo showed them, rather than fabricating a finding.
 
-## Architecture
+**Two models, two jobs.** Voice notes are transcribed with `gemini-3.6-flash`, not Gemma. Gemma 4's audio input is only enabled on its E2B/E4B edge-deployment variants, which are not exposed through the hosted Gemini API this project uses. We discovered this after receiving a live `400 INVALID_ARGUMENT: Audio input modality is not enabled for this model` response from `gemma-4-31b-it`, confirmed it against Google's capability documentation, and routed transcription to a model built for audio input rather than dropping the feature.
 
-```
-Inspector
+### Stack
+| Layer | Technology |
+| --- | --- |
+| Reasoning | Gemma 4 (`gemma-4-31b-it`) |
+| Transcription | Gemini 3.6 Flash (`gemini-3.6-flash`) |
+| Backend | Node.js, Express, TypeScript |
+| Database | PostgreSQL (Neon) + Prisma ORM |
+| Frontend | React + Vite + TypeScript |
+| Storage | Local filesystem / Cloudinary (environment-selected) |
+| Validation | Gemini `responseSchema` + independent Zod re-validation |
+| Monorepo | Turborepo + pnpm |
+| Deployment | Render, Vercel, Neon (DB) |
 
-↓
+## Trust by Design
 
-Inspection Session
+SiteStamp's core bet is that for civic infrastructure, trustworthiness beats novelty, and that has to be demonstrable, not just claimed:
 
-↓
+- **Every finding is clickable.** Click a defect, its supporting photo highlights and scrolls into view. Not "AI said so." Verify it yourself.
+- **Uncertainty is visible, not buried.** A `needsReview` report surfaces a banner, not a quiet field a user has to know to look for.
+- **Structure is enforced twice.** Schema-constrained generation on the API side, then independently re-validated with Zod: belt and suspenders on the one call the whole product depends on.
+- **We chose the slower model on purpose.** A side-by-side test of `gemma-4-31b-it` (55s) against the faster `gemma-4-26b-a4b-it` (32s) on identical evidence showed the smaller model hallucinating a specific bridge name it was never given, and silently dropping an uncertainty flag the larger model correctly raised. Speed lost.
 
-Backend Orchestrator
+## Challenges & Solutions
 
-↓
+**Evidence IDs broke JSON reliability.** Opaque CUID strings inside a nested array were a harder generation target than expected. Solved with integer photo indices resolved server-side, see Technical Implementation.
 
-Gemma 4
+**Gemma 4's audio input wasn't where we assumed.** A live `400` error revealed audio support only exists on E2B/E4B, not the hosted models. Solved by routing transcription to Gemini Flash while keeping Gemma responsible for all multimodal reasoning.
 
-↓
-
-Structured JSON Report
-
-↓
-
-Interactive Report UI
-```
-
-The backend is a lightweight orchestration layer: it stores inspection metadata, manages evidence uploads, performs voice transcription, invokes Gemma for multimodal reasoning, validates the returned structured data, and persists the completed report. The frontend focuses on evidence collection and report visualization.
-
-When the inspector selects **Generate Report**, the system sends site information, inspector notes, transcribed voice notes, and every inspection image to `gemma-4-31b-it` in one request, and receives structured JSON describing severity, summary, defects, recommendations, and review status — validated, then rendered as the final report.
-
-SiteStamp uses hosted Gemma models for simplicity, but the same session-based architecture can target local/edge Gemma models (such as the E2B/E4B variants) for offline field inspections in low-connectivity environments.
-
----
-
-## Technical Highlights
-
-**Session-based reasoning.** Accumulating all evidence into one session, rather than calling the model per upload, lets Gemma reason across observations simultaneously and keeps cost/latency bounded to one call per visit.
-
-**Structured outputs.** `responseSchema`-constrained JSON, re-validated with Zod, makes results deterministic and suitable for future integrations with asset management systems — rather than free-form text.
-
-**Human-in-the-loop.** SiteStamp is designed as an assistant, not an autonomous decision-maker; the `needsReview` mechanism above is the concrete expression of this.
-
----
-
-## Challenges Overcome
-
-Beyond the audio-modality discovery detailed above, two decisions stood out as right despite adding short-term friction:
-
-- **We chose accuracy over speed.** A side-by-side test of `gemma-4-31b-it` (55s) against the faster `gemma-4-26b-a4b-it` (32s) on identical evidence showed the smaller model hallucinating a specific bridge name it was never given, and silently dropping an uncertainty flag the larger model correctly raised. For a tool whose entire value proposition is trustworthiness, we kept the slower, more careful model everywhere it touches the actual submission.
-- **We kept storage boring on purpose.** Evidence files are stored on local disk via multer, not a cloud bucket, deliberately, since this is a public hackathon repository and we didn't want judges needing a Cloudinary or S3 account just to run the project. Nothing about the Gemma integration depends on where bytes are stored; images are base64-encoded from disk into each request either way.
-- **We chose humility over completeness**. Early prompt iterations rewarded Gemma for producing a fully filled-out report; every field populated, every defect assessed. That pushed it toward guessing on ambiguous evidence rather than admitting a gap. We rewrote the prompt to explicitly reward saying "I can't confirm this" over a confident wrong answer, which is what made `needsReview` actually trustworthy instead of a flag that never fires.
+**We chose humility over completeness.** Early prompt iterations rewarded Gemma for producing a fully filled-out report; every field populated, every defect assessed. That pushed it toward guessing on ambiguous evidence rather than admitting a gap. We rewrote the prompt to explicitly reward saying "I can't confirm this" over a confident wrong answer, which is what made `needsReview` actually trustworthy instead of a flag that never fires.
 
 ## Why This Matters
 
-A report generated by SiteStamp reads like something a careful inspector wrote by hand — but it took one synchronous call instead of an evening of transcription, and every claim in it can be clicked back to the photo it came from. For infrastructure maintenance in resource-constrained environments, where inspection capacity is the real bottleneck, that combination — faster documentation, and *more*, not less, verifiability — is the actual value proposition.
+Public infrastructure is only as safe as it is inspected, and inspection capacity, not willingness, is usually the bottleneck. Every hour an engineer spends turning scattered photos and notes into a formal report is an hour not spent on the next site. In resource-constrained environments, that tradeoff compounds: fewer assets get inspected, and the reports that do get written are harder to verify. SiteStamp doesn't replace engineering judgment; it gives a maintenance authority a faster, more consistent, more traceable basis to act on.
+
+## What Makes SiteStamp Different
+
+Most AI inspection concepts stop at "photo in, caption out." SiteStamp treats the harder problem as the actual product: synthesizing a *session's* worth of fragmented evidence into one coherent, checkable assessment. The guidance isn't a chatbot; it's a structured document a maintenance authority could act on, with every claim traceable to its source and every gap in the evidence honestly flagged rather than papered over.
+
+For a field engineer documenting a bridge after a long site visit, SiteStamp reduces hours of manual report writing to a single evidence-backed synthesis step while preserving the engineer's ability to verify every conclusion.
 
 ---
-
-## Track Fit
-
-Submitted under **Multimodal Application** — the core mechanism (synthesizing multiple images, transcribed voice, and text into one grounded structured output) is a direct match for the track's criteria and reflects exactly what the system does end to end.
-
-## Links
-
-- [SiteStamp Github Repo](https://github.com/kataszn/sitestamp)
-- [SiteStamp Live Demo](https://youtube.com/sitestamp)
+*Built for Build with Gemma: TFUG Prayagraj [AI Prayagraj], 2026.*
