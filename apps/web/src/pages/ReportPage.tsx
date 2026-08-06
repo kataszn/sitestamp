@@ -3,8 +3,9 @@ import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom"
 import { VisitDTO } from "@sitestamp/shared";
 import ReportView from "../components/ReportView";
 
-export const ReportPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+export const ReportPage: React.FC<{ readOnly?: boolean }> = ({ readOnly = false }) => {
+  const { id, visitId } = useParams<{ id: string; visitId: string }>();
+  const visitIdParam = id ?? visitId;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [visit, setVisit] = useState<VisitDTO | null>(null);
@@ -17,7 +18,7 @@ export const ReportPage: React.FC = () => {
 
   const fetchVisit = useCallback(async () => {
     try {
-      const response = await fetch(`${apiBase}/visits/${id}`);
+      const response = await fetch(`${apiBase}/visits/${visitIdParam}`);
       if (!response.ok) {
         throw new Error("Visit report details could not be retrieved");
       }
@@ -29,7 +30,7 @@ export const ReportPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [id, apiBase]);
+  }, [visitIdParam, apiBase]);
 
   useEffect(() => {
     fetchVisit();
@@ -37,9 +38,9 @@ export const ReportPage: React.FC = () => {
 
   useEffect(() => {
     if (visit?.status === "COMPLETE" && generateRequested) {
-      navigate(`/visits/${id}/report`, { replace: true });
+      navigate(`/visits/${visitIdParam}/report`, { replace: true });
     }
-  }, [visit?.status, generateRequested, navigate, id]);
+  }, [visit?.status, generateRequested, navigate, visitIdParam]);
 
   useEffect(() => {
     const shouldPoll = generateRequested || visit?.status === "GENERATING";
@@ -65,7 +66,7 @@ export const ReportPage: React.FC = () => {
     try {
       // Reset the visit to OPEN so the report is marked stale; the user can
       // then regenerate from the visit details page.
-      await fetch(`${apiBase}/visits/${id}/status`, {
+      await fetch(`${apiBase}/visits/${visitIdParam}/status`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "OPEN" }),
@@ -76,7 +77,7 @@ export const ReportPage: React.FC = () => {
       return;
     }
     // Navigate to the visit details page with the visit back in OPEN status.
-    navigate(`/visits/${id}`);
+    navigate(`/visits/${visitIdParam}`);
   };
 
   const [noteStep, setNoteStep] = useState(0);
@@ -249,7 +250,7 @@ export const ReportPage: React.FC = () => {
 
   return (
     <div className="report-page">
-      <ReportView visit={visit} />
+      <ReportView visit={visit} readOnly={readOnly} />
     </div>
   );
 };
