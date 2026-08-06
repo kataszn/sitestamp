@@ -1,4 +1,4 @@
-import { EvidenceDTO, VisitDTO, ReportDTO } from "@sitestamp/shared";
+import { EvidenceDTO, VisitDTO, ReportDTO, TrendPoint } from "@sitestamp/shared";
 import { Evidence, Report, Visit } from "#features/visit/domain/model";
 
 const toEvidenceDTO = (evidence: Evidence): EvidenceDTO => ({
@@ -9,7 +9,7 @@ const toEvidenceDTO = (evidence: Evidence): EvidenceDTO => ({
   noteSource: evidence.noteSource as EvidenceDTO['noteSource'],
 });
 
-const toReportDTO = (report: Report): ReportDTO => {
+const toReportDTO = (report: Report & { trendPoints?: TrendPoint[] }): ReportDTO => {
   return {
     summary: report.summary,
     severity: report.severity as ReportDTO['severity'],
@@ -19,7 +19,9 @@ const toReportDTO = (report: Report): ReportDTO => {
       evidenceIds: defect.evidenceIds,
     })) as ReportDTO['defects'],
     recommendation: report.recommendation,
+    historicalAssessment: report.historicalAssessment,
     needsReview: report.needsReview,
+    trendPoints: report.trendPoints ?? null,
   };
 };
 

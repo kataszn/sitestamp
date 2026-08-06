@@ -37,6 +37,21 @@ export interface ReportDTO {
   defects: DefectData[];
   recommendation: string;
   needsReview: boolean;
+  historicalAssessment: HistoricalAssessment | null;
+  trendPoints: TrendPoint[] | null;
 }
 
 export type Severity = 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
+
+export interface TrendPoint {
+  date: string;
+  severity: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
+  isCurrent: boolean;
+}
+export type Trend = 'IMPROVING' | 'STABLE' | 'DETERIORATING';
+
+export interface HistoricalAssessment {
+  trend: Trend;
+  narrative: string;
+  priorVisitCount: number;
+}

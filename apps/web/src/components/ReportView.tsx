@@ -4,6 +4,7 @@ import { VisitDTO } from "@sitestamp/shared";
 import SeverityGauge from "./SeverityGauge";
 import DefectItem from "./DefectItem";
 import { useToast } from "./Toast";
+import { HistoricalAssessment } from "./HistoricalAssessment";
 
 export function ReportView({ visit, readOnly = false }: { visit: VisitDTO; readOnly?: boolean }) {
   const navigate = useNavigate();
@@ -176,6 +177,10 @@ export function ReportView({ visit, readOnly = false }: { visit: VisitDTO; readO
             ))}
           </div>
         </div>
+      )}
+
+      {report.historicalAssessment && (
+        <HistoricalAssessment data={report.historicalAssessment} trendPoints={report.trendPoints || undefined} />
       )}
 
       {/* 6. Recommendation inside rec-box */}

@@ -67,7 +67,23 @@ export const getVisit = async (visitId: string): Promise<VisitDTO> => {
   if (!visit) {
     throw new AppError(Errors.NOT_FOUND, { message: "Visit not found" });
   }
-  return mapper.toVisitDTO(visit);
+  
+  const report = visit.report;
+  if (!report) {
+    return mapper.toVisitDTO(visit);
+  }
+
+  const reportDTO = mapper.toReportDTO(report);
+  if (report.historicalAssessment && visit.assetCode) {
+    reportDTO.trendPoints = await repo.getTrendPoints(
+      visit.assetCode,
+      visit.id,
+      visit.createdAt,
+      report.severity,
+    );
+  }
+
+  return { ...mapper.toVisitDTO(visit), report: reportDTO };
 };
 
 export const generateReport = async (visitId: string): Promise<ReportDTO> => {
@@ -89,16 +105,18 @@ export const generateReport = async (visitId: string): Promise<ReportDTO> => {
     
     const { report, raw } = await gemma.generateReport(
       visit.siteName,
+      visit.assetCode,
       visit.notes,
-      evidenceInputs
+      evidenceInputs,
+      visit.id,
+      new Date(visit.createdAt),
     );
 
     report.defects = resolveEvidenceIds(report.defects, visit.evidence);
 
     savedReport = await repo.saveReport({
       visitId,
-      ...report,
-      rawModelJson: raw,
+      report: { ...report, rawModelJson: raw },
     });
   } catch (error) {
     // Set visit status to FAILED and store the error message

@@ -35,6 +35,13 @@ export function toDomainReport(record: any): Report {
       : [],
     recommendation: String(normalized.recommendation),
     needsReview: Boolean(normalized.needsReview),
+    historicalAssessment: normalized.historicalAssessment
+      ? {
+          trend: normalized.historicalAssessment.trend,
+          narrative: String(normalized.historicalAssessment.narrative),
+          priorVisitCount: Number(normalized.historicalAssessment.priorVisitCount),
+        }
+      : null, 
     createdAt: normalized.createdAt instanceof Date ? normalized.createdAt : new Date(normalized.createdAt),
   };
 }
