@@ -8,7 +8,7 @@ export const NewVisitPage: React.FC = () => {
   const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleCreateVisit = async (data: { siteName: string; inspectorName: string; notes: string }) => {
+  const handleCreateVisit = async (data: { siteName: string; inspectorName: string; notes: string; assetCode: string }) => {
     setIsLoading(true);
     const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/v1";
 

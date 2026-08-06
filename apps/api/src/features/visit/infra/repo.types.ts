@@ -3,6 +3,7 @@ import { DefectData, Severity } from "@sitestamp/shared";
 export type CreateVisit = {
   siteName: string;
   inspectorName: string;
+  assetCode?: string;
   notes?: string;
 };
 

@@ -4,6 +4,7 @@ export const createVisit = z.object({
   body: z.object({
     inspectorName: z.string().min(1, { message: 'Inspector name is required' }),
     siteName: z.string().min(1, { message: 'Site name is required' }),
+    assetCode: z.string().optional(),
     notes: z.string().optional(),
   }),
 });

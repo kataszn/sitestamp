@@ -9,6 +9,7 @@ datasource db {
 
 model Visit {
   id            String      @id @default(cuid())
+  assetCode     String?  // optional, e.g. "BRG-MB-003" - stable identifier across visits to the same asset
   inspectorName String
   siteName      String
   notes         String?

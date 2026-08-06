@@ -45,6 +45,7 @@ export function toDomain(record: any): Visit {
   return {
     id: normalized.id,
     siteName: String(normalized.siteName),
+    assetCode: normalized.assetCode ?? null,
     inspectorName: String(normalized.inspectorName),
     notes: normalized.notes ?? null,
     status: normalized.status,

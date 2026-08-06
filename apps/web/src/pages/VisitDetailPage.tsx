@@ -125,6 +125,9 @@ export const VisitDetailPage: React.FC = () => {
               {visit.siteName}
             </h1>
             <p style={{ margin: 0, fontFamily: "IBM Plex Mono, monospace", fontSize: "12px", color: "var(--steel)" }}>
+              {visit.assetCode && (
+                <span>Asset: <b>{visit.assetCode}</b> · </span>
+              )}
               Inspector: <b>{visit.inspectorName}</b> · Visit #{visit.id}
             </p>
           </div>

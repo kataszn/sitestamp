@@ -10,6 +10,7 @@ export async function create(data: CreateVisit): Promise<Visit> {
     data: {
       siteName: data.siteName,
       inspectorName: data.inspectorName,
+      assetCode: data.assetCode,
       notes: data.notes,
     },
     include: {
@@ -129,5 +130,22 @@ export async function markVisitFailed(id: string, error: string) {
   return DB.visit.update({
     where: { id },
     data: { status: "FAILED" as Visit["status"], lastError: error },
+  });
+}
+
+export async function findVisitsByAsset(assetCode: string, excludeVisitId: string) {
+  return DB.visit.findMany({
+    where: { assetCode, id: { not: excludeVisitId }, status: 'COMPLETE' },
+    orderBy: { createdAt: 'desc' },
+    include: { report: true },
+  });
+}
+
+// Fallback for visits without an assetCode set — least reliable, use only if assetCode is absent
+export async function findVisitsBySiteName(siteName: string, excludeVisitId: string) {
+  return DB.visit.findMany({
+    where: { siteName: { equals: siteName.trim(), mode: 'insensitive' }, id: { not: excludeVisitId }, status: 'COMPLETE' },
+    orderBy: { createdAt: 'desc' },
+    include: { report: true },
   });
 }

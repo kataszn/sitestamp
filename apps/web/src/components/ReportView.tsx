@@ -132,6 +132,11 @@ export function ReportView({ visit, readOnly = false }: { visit: VisitDTO; readO
           <span>
             DATE: <b>{formattedDate}</b>
           </span>
+          {visit.assetCode && (
+            <span>
+              ASSET: <b>{visit.assetCode}</b>
+            </span>
+          )}
           <span>
             INSPECTOR: <b>{visit.inspectorName || "Unknown"}</b>
           </span>

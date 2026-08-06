@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface VisitFormProps {
-  onSubmit: (data: { siteName: string; inspectorName: string; notes: string }) => void;
+  onSubmit: (data: { siteName: string; inspectorName: string; notes: string; assetCode: string }) => void;
   isLoading: boolean;
 }
 
@@ -11,11 +11,12 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSubmit, isLoading }) => 
   const [siteName, setSiteName] = useState("");
   const [inspectorName, setInspectorName] = useState("");
   const [notes, setNotes] = useState("");
+  const [assetCode, setAssetCode] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!siteName.trim() || !inspectorName.trim()) return;
-    onSubmit({ siteName, inspectorName, notes });
+    onSubmit({ siteName, inspectorName, notes, assetCode });
   };
 
   return (
@@ -32,6 +33,20 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSubmit, isLoading }) => 
           required
           disabled={isLoading}
         />
+      </div>
+
+      <div className="form-field">
+        <label htmlFor="assetCode">Asset Code (optional)  </label>
+        <input
+          id="assetCode"
+          type="text"
+          className="form-control"
+          placeholder="e.g. BRG-MB-003"
+          value={assetCode}
+          onChange={(e) => setAssetCode(e.target.value)}
+          disabled={isLoading}
+        />
+        <p className="field-hint">Use the same code across visits to the same asset to link inspection history.</p>
       </div>
 
       <div className="form-group">
