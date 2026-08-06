@@ -1,17 +1,12 @@
-import { NoteSource } from "@sitestamp/shared";
 import { AppError, Errors } from "#core/errors";
 import { logger } from "#core/logger";
 import { catchAsync } from "#utils/catch-async";
 import * as services from "#features/visit/domain/service";
-import { transcribeAudio } from "#features/visit/infra/gemma.client";
-import { randomUUID } from "node:crypto";
-import path from "node:path";
-import fs from 'node:fs/promises';
-import { ENV } from "#core/env";
 import { RequestHandler } from "express";
+import { CreateVisitInput, AddEvidenceInput } from '../domain/types';
 
 export const createVisit: RequestHandler = catchAsync(async (req, res) => {
-  const visit = await services.createVisit(req.body);
+  const visit = await services.createVisit(req.body as CreateVisitInput);
   res.status(201).json(visit);
 });
 
@@ -43,7 +38,7 @@ export const addEvidence: RequestHandler = catchAsync(async (req, res) => {
     note: req.body.note,
     image,
     audio,
-  });
+  } as AddEvidenceInput);
   res.status(200).json(evidence);
 });
 
