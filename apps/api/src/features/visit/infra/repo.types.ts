@@ -1,4 +1,4 @@
-import { DefectData, Severity } from "@sitestamp/shared";
+import { DefectData, ReportData, Severity } from "@sitestamp/shared";
 
 export type CreateVisit = {
   siteName: string;
@@ -17,10 +17,7 @@ export type AddEvidence = {
 
 export type SaveReport = {
   visitId: string;
-  summary: string;
-  severity: Severity;
-  defects: DefectData[];
-  recommendation: string;
-  needsReview: boolean;
-  rawModelJson: string;
+  report: ReportData & {
+    rawModelJson: string;
+  };
 };

@@ -248,7 +248,7 @@ export const VisitDetailPage: React.FC = () => {
             style={{ width: "100%", fontSize: "14px", padding: "12px" }}
             disabled={visit.evidence.length === 0 || isGenerating}
           >
-            {isGenerating ? "Generating Report (may take up to 60s)..." : "Generate Inspection Report 🔍"}
+            {isGenerating ? "Generating Report (may take up to 60s)..." : "Generate Report 🔍"}
           </button>
         </div>
       </div>

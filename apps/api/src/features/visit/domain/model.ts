@@ -1,4 +1,4 @@
-import { Severity } from "@sitestamp/shared";
+import { Severity, Trend } from "@sitestamp/shared";
 
 export interface Visit {
   id: string;
@@ -22,6 +22,11 @@ export interface Report {
   defects: Defect[];
   recommendation: string;
   needsReview: boolean;
+  historicalAssessment: {
+    trend: Trend;
+    narrative: string;
+    priorVisitCount: number;
+  } | null;
 
   createdAt: Date;
 }

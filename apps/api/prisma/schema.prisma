@@ -48,17 +48,18 @@ enum NoteSource {
 }
 
 model Report {
-  id             String   @id @default(cuid())
-  visitId        String   @unique
-  visit          Visit    @relation(fields: [visitId], references: [id])
-  summary        String
-  severity       Severity
-  defects        Json // DefectData[]
+  id                    String   @id @default(cuid())
+  visitId               String   @unique
+  visit                 Visit    @relation(fields: [visitId], references: [id])
+  summary               String
+  severity              Severity
+  defects               Json // DefectData[]
   recommendation String
-  needsReview    Boolean  @default(false)
-  rawModelJson   Json // full Gemma response
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  needsReview           Boolean  @default(false)
+  historicalAssessment  Json?   // nullable — absent when no history was used
+  rawModelJson          Json // full Gemma response
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }
 
 enum Severity {

@@ -1,20 +1,28 @@
 # SiteStamp 🔍
 
-> AI-powered infrastructure inspection platform that transforms field evidence into professional engineering reports using Google's Gemma models.
+![Gemma 4](https://img.shields.io/badge/AI-Gemma%204-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-6.x-3178C6)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-Built for the **Build with Gemma: AI for Africa Hackathon – Minna 2026**.
+> AI-powered infrastructure inspection platform that transforms multimodal field evidence into trustworthy engineering reports with evidence-backed findings and historical asset intelligence.
+
+Built for the **Build with Gemma Hackathon Series (2026)** using **Gemma 4**.
 
 ---
 
 ## Features
 
 - 📷 Capture inspection evidence with photos
-- 🎤 Record voice notes (automatically transcribed)
-- 🧠 AI-powered multimodal inspection report generation
-- 📋 Structured engineering reports with severity assessment
+- 🎤 Record voice observations with automatic transcription
+- 🧠 Generate multimodal engineering inspection reports using Gemma 4
+- 📋 Structured reports with severity assessment and repair recommendations
+- 🔍 Click defects to highlight supporting inspection evidence
+- 📈 Historical asset assessment with inspection trend visualization
+- 🏷️ Asset codes for tracking infrastructure across multiple inspections
 - 🔄 Regenerate reports from existing inspection data
-- 📂 Browse completed inspection visits
-- 🔍 Click defects to highlight supporting evidence
+- 🔗 Share reports through view-only links
+- 📄 Export clean, printable inspection reports
+- ☁️ Pluggable evidence storage (Local or Cloudinary)
 
 ---
 
@@ -23,22 +31,43 @@ Built for the **Build with Gemma: AI for Africa Hackathon – Minna 2026**.
 ```text
 .
 ├── apps/
-│   ├── api/          # Node.js + Prisma backend
-│   └── web/          # React + Vite frontend
+│   ├── api/          # Express API, AI orchestration & persistence
+│   └── web/          # React frontend
 ├── packages/
-│   └── shared/       # Shared types & utilities
+│   └── shared/       # Shared schemas, types & utilities
 ├── turbo.json
 └── package.json
 ```
+
 ---
 
 ## Tech Stack
 
-* **AI** — Google Gemma 4 + Gemini Flash (voice transcription)
-* **Frontend** — React + Vite + TypeScript
-* **Backend** — Node.js + Express + Prisma
-* **Database** — SQLite
-* **Monorepo** — Turborepo + pnpm Workspaces
+| Layer | Technology |
+|------|------------|
+| AI | Gemma 4 (`gemma-4-31b-it`) + Gemini Flash (voice transcription) |
+| Frontend | React, Vite, TypeScript |
+| Backend | Node.js, Express, Prisma |
+| Database | SQLite (local) / PostgreSQL (production) |
+| Storage | Local filesystem or Cloudinary |
+| Validation | Zod + structured JSON generation (`responseSchema`) |
+| Monorepo | Turborepo + pnpm Workspaces |
+| Deployment | Vercel, Render, Neon |
+
+---
+
+## Highlights
+
+SiteStamp is built around a simple principle:
+
+> **For public infrastructure, trustworthiness matters more than AI capability.**
+
+Rather than producing free-form AI responses, SiteStamp generates structured engineering reports where:
+
+- Every defect is linked back to the supporting inspection evidence.
+- Reports can explicitly flag uncertainty instead of guessing.
+- Historical inspections are summarized into asset-level trends.
+- Deterministic backend validation ensures reports conform to a strict schema before being stored.
 
 ---
 
@@ -46,8 +75,8 @@ Built for the **Build with Gemma: AI for Africa Hackathon – Minna 2026**.
 
 ### Prerequisites
 
-* Node.js 22+
-* pnpm
+- Node.js 22+
+- pnpm
 
 ### Installation
 
@@ -59,19 +88,23 @@ cd sitestamp
 pnpm install
 ```
 
-Copy the example environment file in apps/api/ and apps/web:
+Copy the environment files:
 
 ```bash
-cp .env.example .env
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
 ```
 
-Update the following environment variable:
+Configure your API credentials:
 
 ```text
 GOOGLE_API_KEY=your_api_key_here
+
+# Optional
+CLOUDINARY_URL=...
 ```
 
-Then start the development servers (project root):
+Start the development servers:
 
 ```bash
 pnpm dev
@@ -81,23 +114,69 @@ pnpm dev
 
 ## Development URLs
 
-| Service | URL                                            |
-| ------- | ---------------------------------------------- |
-| Web     | [http://localhost:3000](http://localhost:3000) |
-| API     | [http://localhost:4000](http://localhost:4000) |
+| Service | URL |
+|---------|-----|
+| Web | http://localhost:3000 |
+| API | http://localhost:4000 |
+| Swagger | http://localhost:4000/docs |
 
 ---
 
 ## Available Scripts
 
-| Command      | Description                                |
-| ------------ | ------------------------------------------ |
-| `pnpm dev`   | Start all applications in development mode |
-| `pnpm build` | Build all packages                         |
-| `pnpm lint`  | Lint the entire workspace                  |
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start all applications |
+| `pnpm build` | Build the workspace |
+| `pnpm lint` | Run ESLint |
+| `pnpm test` | Run tests |
+
+---
+
+## Architecture
+
+```text
+Inspector
+    │
+    ▼
+Inspection Session
+    │
+    ├── Photos
+    ├── Voice Notes
+    └── Text Notes
+            │
+            ▼
+     Backend Orchestrator
+            │
+            ├── Voice Transcription
+            ├── Prompt Assembly
+            ├── Gemma 4
+            ├── Schema Validation
+            └── Historical Asset Lookup
+                    │
+                    ▼
+        Structured Engineering Report
+                    │
+                    ▼
+Interactive Evidence-backed Report
+```
 
 ---
 
 ## Repository
 
 This project uses a Turborepo monorepo with shared packages between the frontend and backend.
+
+```
+apps/
+  api/        Express API, AI orchestration & persistence
+  web/        React application
+packages/
+  shared/     Shared types, schemas and utilities
+```
+
+---
+
+## License
+
+MIT

@@ -147,7 +147,7 @@ export const ReportPage: React.FC<{ readOnly?: boolean }> = ({ readOnly = false 
               {visit?.siteName || "Generating report"}
             </h1>
             <p style={{ margin: 0, fontFamily: "IBM Plex Mono, monospace", fontSize: "12px", color: "var(--steel)" }}>
-              {visit ? <>Inspector: <b>{visit.inspectorName}</b> · Visit #{visit.id}</> : "Starting report generation..."}
+              {visit ? <>{visit.assetCode && <span>Asset: <b>{visit.assetCode}</b> · </span>}Inspector: <b>{visit.inspectorName}</b> · Visit #{visit.id}</> : "Starting report generation..."}
             </p>
           </div>
           <div>
@@ -191,7 +191,7 @@ export const ReportPage: React.FC<{ readOnly?: boolean }> = ({ readOnly = false 
               {visit?.siteName || "Report generation failed"}
             </h1>
             <p style={{ margin: 0, fontFamily: "IBM Plex Mono, monospace", fontSize: "12px", color: "var(--steel)" }}>
-              {visit ? <>Inspector: <b>{visit.inspectorName}</b> · Visit #{visit.id}</> : "Report generation failed"}
+              {visit ? <>{visit.assetCode && <span>Asset: <b>{visit.assetCode}</b> · </span>}Inspector: <b>{visit.inspectorName}</b> · Visit #{visit.id}</> : "Report generation failed"}
             </p>
           </div>
           <div>
