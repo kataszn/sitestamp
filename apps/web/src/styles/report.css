@@ -6,6 +6,8 @@
   --ink: #1B2430;
   --blueprint: #2E5266;
   --blueprint-soft: #E7EDEF;
+  --redprint: #C2571A;
+  --redprint-soft: #F5E9E3;
   --line: #CBD1C8;
   --steel: #5B6B6C;
   --low: #4F7942;
@@ -357,6 +359,14 @@ body {
 
 .footer-actions {
   display: flex;
+  flex: 1;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.footer-share-group {
+  display: flex;
   gap: 8px;
   align-items: center;
 }
@@ -394,6 +404,13 @@ body {
 }
 .export-btn:hover { background: var(--blueprint); }
 .export-btn:focus-visible { outline: 2px solid var(--blueprint); outline-offset: 2px; }
+
+.export-btn.secondary {
+  background: transparent;
+  color: var(--redprint);
+  border: 1px solid var(--redprint);
+}
+.export-btn.secondary:hover { background: var(--redprint-soft); }
 
 .state-message {
   font-family: 'IBM Plex Mono', monospace;

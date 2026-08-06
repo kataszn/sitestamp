@@ -15,6 +15,7 @@ function App() {
           <Route path="/visits/completed" element={<CompletedVisitsPage />} />
           <Route path="/visits/:id" element={<VisitDetailPage />} />
           <Route path="/visits/:id/report" element={<ReportPage />} />
+          <Route path="/share/:visitId" element={<ReportPage readOnly />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
