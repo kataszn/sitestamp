@@ -26,11 +26,14 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="toast-container" style={containerStyle}>
+      <div className="toast-container">
         {toasts.map((toast) => (
-          <div key={toast.id} className="toast" style={{ ...toastStyle, ...toastTypeStyles[toast.type] }}>
+          <div key={toast.id} className={`toast toast-${toast.type}`}>
             <span style={{ flex: 1 }}>{toast.message}</span>
-            <button onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))} style={closeButtonStyle}>
+            <button
+              onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
+              className="toast-close"
+            >
               ×
             </button>
           </div>
@@ -46,47 +49,4 @@ export const useToast = () => {
     throw new Error("useToast must be used within a ToastProvider");
   }
   return context;
-};
-
-const containerStyle: React.CSSProperties = {
-  position: "fixed",
-  bottom: "24px",
-  right: "24px",
-  zIndex: 9999,
-  display: "flex",
-  flexDirection: "column",
-  gap: "8px",
-  pointerEvents: "none",
-};
-
-const toastStyle: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: "12px",
-  padding: "12px 16px",
-  borderRadius: "8px",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-  minWidth: "280px",
-  maxWidth: "400px",
-  fontSize: "14px",
-  fontFamily: "system-ui, sans-serif",
-  pointerEvents: "auto",
-  animation: "slideIn 0.3s ease-out",
-};
-
-const toastTypeStyles: Record<"success" | "error" | "info", React.CSSProperties> = {
-  success: { background: "#10b981", color: "white" },
-  error: { background: "#ef4444", color: "white" },
-  info: { background: "#3b82f6", color: "white" },
-};
-
-const closeButtonStyle: React.CSSProperties = {
-  background: "none",
-  border: "none",
-  color: "inherit",
-  fontSize: "20px",
-  cursor: "pointer",
-  lineHeight: 1,
-  padding: 0,
-  opacity: 0.7,
 };
