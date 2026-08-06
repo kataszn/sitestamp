@@ -1,10 +1,10 @@
 import { GoogleGenAI, Type, ApiError } from '@google/genai';
-import { schema, type ReportData } from '@sitestamp/shared';
 import { ENV } from '#core/env';
 import { AppError, Errors } from '#core/errors';
-import { buildInspectionPrompt } from '#features/visit/domain/report.prompt';
-import { getSiteHistoryTool } from '#features/visit/domain/agent.tools';
-import { getSiteHistorySummaries } from '#features/visit/infra/repo';
+import { buildInspectionPrompt } from '#features/visit/domain/ai/inspection.prompt';
+import { getSiteHistoryTool } from '#features/visit/domain/ai/agent.tools';
+import { getSiteHistorySummaries } from '#features/visit/infra/db/repo';
+import { type ReportData, reportSchema } from './report.schema';
 
 const ai = new GoogleGenAI({ apiKey: ENV.GOOGLE_AI_API_KEY });
 
@@ -95,7 +95,7 @@ export async function generateReport(
   if (!functionCall) {
     const raw = mustText(first);
     const parsed = JSON.parse(raw);
-    return { report: schema.report.parse(parsed), raw };
+    return { report: reportSchema.parse(parsed), raw };
   }
 
   // Exactly one hop: execute the tool, feed the result back, force a final
@@ -133,7 +133,7 @@ export async function generateReport(
   });
   const raw = mustText(second);
   const parsed = JSON.parse(raw);
-  return { report: schema.report.parse(parsed), raw };
+  return { report: reportSchema.parse(parsed), raw };
 }
 
 function mustText(response: { text?: string }): string {
