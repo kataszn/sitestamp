@@ -822,4 +822,17 @@ button.inline-link:disabled {
 .meta-asset-code {
   color: var(--blueprint);
   font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.meta-asset-code:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: var(--redprint);
+}
+
+.meta-asset-code:focus-visible {
+  outline: 2px solid var(--blueprint);
+  outline-offset: 2px;
 }
