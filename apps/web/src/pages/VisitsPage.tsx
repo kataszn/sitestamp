@@ -17,6 +17,7 @@ export const VisitsPage: React.FC = () => {
   const [visits, setVisits] = useState<VisitDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("ALL");
+  const [assetFilter, setAssetFilter] = useState<string | null>(null);
 
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/v1";
 
@@ -39,11 +40,13 @@ export const VisitsPage: React.FC = () => {
     fetchVisits();
   }, [apiBase]);
 
-  const filtered = visits.filter((v) => {
-    if (filter === "OPEN") return isOpen(v);
-    if (filter === "COMPLETED") return !isOpen(v);
-    return true;
-  });
+  const filtered = visits
+    .filter((v) => {
+      if (filter === "OPEN") return isOpen(v);
+      if (filter === "COMPLETED") return !isOpen(v);
+      return true;
+    })
+    .filter((v) => (assetFilter ? v.assetCode === assetFilter : true));
 
   const openCount = visits.filter(isOpen).length;
   const completedCount = visits.length - openCount;
@@ -115,13 +118,52 @@ export const VisitsPage: React.FC = () => {
               );
             })}
           </div>
+
+          {/* Active asset filter indicator */}
+          {assetFilter && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginTop: "14px",
+                fontFamily: "IBM Plex Mono, monospace",
+                fontSize: "11px",
+                letterSpacing: "0.04em",
+                color: "var(--steel)",
+              }}
+            >
+              <span>
+                Filtering by asset:{" "}
+                <b style={{ color: "var(--blueprint)", fontWeight: 600 }}>{assetFilter}</b>
+              </span>
+              <button
+                onClick={() => setAssetFilter(null)}
+                style={{
+                  cursor: "pointer",
+                  background: "transparent",
+                  border: "1px solid var(--line)",
+                  color: "var(--steel)",
+                  padding: "2px 10px",
+                  fontFamily: "IBM Plex Mono, monospace",
+                  fontSize: "10.5px",
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                }}
+              >
+                Clear
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Visit list */}
         {filtered.length === 0 ? (
           <div className="section">
             <p style={{ color: "var(--steel)", fontSize: "14px", fontStyle: "italic", margin: 0 }}>
-              {filter === "OPEN"
+              {assetFilter
+                ? `No visits found for asset ${assetFilter}.`
+                : filter === "OPEN"
                 ? "No open visits. Start a new inspection to begin."
                 : filter === "COMPLETED"
                 ? "No completed visits yet."
@@ -132,6 +174,7 @@ export const VisitsPage: React.FC = () => {
           <div style={{ padding: "16px 28px 24px", display: "flex", flexDirection: "column", gap: "10px" }}>
             {filtered.map((visit) => {
               const open = isOpen(visit);
+              const assetCode = visit.assetCode;
               return (
                 <div
                   key={visit.id}
@@ -160,7 +203,21 @@ export const VisitsPage: React.FC = () => {
                       {visit.siteName}
                     </div>
                     <div className="meta-row" style={{ gap: "12px", fontSize: "11.5px" }}>
-                      {visit.assetCode && <span>Asset: <span className="meta-asset-code">{visit.assetCode}</span></span>}
+                      {assetCode && (
+                        <span>
+                          Asset:{" "}
+                          <span
+                            className="meta-asset-code"
+                            title={`Filter visits by ${assetCode}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setAssetFilter((current) => (current === assetCode ? null : assetCode));
+                            }}
+                          >
+                            {assetCode}
+                          </span>
+                        </span>
+                      )}
                       <span>Inspector: <b>{visit.inspectorName}</b></span>
                       {visit.notes && <span>· {visit.notes}</span>}
                       <span>· {new Date(visit.createdAt).toLocaleDateString()}</span>
