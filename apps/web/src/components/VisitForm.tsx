@@ -80,8 +80,8 @@ export const VisitForm: React.FC<VisitFormProps> = ({ onSubmit, isLoading }) => 
         <button type="submit" className="btn" disabled={isLoading || !siteName.trim() || !inspectorName.trim()}>
           {isLoading ? "Starting Visit..." : "Start Visit"}
         </button>
-        <button type="button" className="btn-secondary" onClick={() => navigate("/visits/completed")}>
-          View Completed Visits
+        <button type="button" className="btn-secondary" onClick={() => navigate("/visits")}>
+          View Visits
         </button>
       </div>
     </form>
