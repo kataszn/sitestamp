@@ -28,7 +28,10 @@ export function registerMiddlewares(app: express.Express): void {
   app.use(
     morgan(":method :url :status :res[content-length] - :response-time ms", {
       stream: morganStream,
-      skip: (_req, _res) => process.env.NODE_ENV === "test",
+      skip: (req, res) =>
+        process.env.NODE_ENV === "test" ||
+        (process.env.NODE_ENV === "production" &&
+          (req.path === "/health" || res.statusCode === 304)),
     }),
   );
 }
