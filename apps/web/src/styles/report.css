@@ -176,6 +176,24 @@ body {
   margin-bottom: 14px;
 }
 
+.brand-link {
+  color: var(--blueprint);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.brand-link:hover {
+  color: var(--redprint);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.eyebrow-sep {
+  margin: 0 6px;
+  color: var(--steel);
+}
+
 .site-name {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
