@@ -48,7 +48,7 @@ Built for the **Build with Gemma Hackathon Series (2026)** using **Gemma 4**.
 | AI | Gemma 4 (`gemma-4-31b-it`) + Gemini Flash (voice transcription) |
 | Frontend | React, Vite, TypeScript |
 | Backend | Node.js, Express, Prisma |
-| Database | SQLite (local) / PostgreSQL (production) |
+| Database | PostgreSQL |
 | Storage | Local filesystem or Cloudinary |
 | Validation | Zod + structured JSON generation (`responseSchema`) |
 | Monorepo | Turborepo + pnpm Workspaces |

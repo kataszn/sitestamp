@@ -24,6 +24,7 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
   const durationIntervalRef = useRef<number | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const stopResolverRef = useRef<((blob: Blob | null) => void) | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -82,6 +83,11 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
         const finalBlob = new Blob(chunksRef.current, { type: blobType });
         setAudioBlob(finalBlob);
         setAudioUrl(URL.createObjectURL(finalBlob));
+        // Resolve any pending "stop and wait for blob" promise from submit
+        if (stopResolverRef.current) {
+          stopResolverRef.current(finalBlob);
+          stopResolverRef.current = null;
+        }
       };
 
       recorder.start();
@@ -98,17 +104,25 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
     }
   };
 
-  const stopRecording = () => {
+  const stopRecording = (): Promise<Blob | null> => {
+    // If a recording is in progress, stop it and wait for the final blob to be
+    // assembled in the onstop handler before resolving.
     if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
+      const promise = new Promise<Blob | null>((resolve) => {
+        stopResolverRef.current = resolve;
+        mediaRecorderRef.current!.stop();
+      });
+      // Clean up the stream and duration counter regardless of blob assembly
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+      }
+      if (durationIntervalRef.current) {
+        clearInterval(durationIntervalRef.current);
+      }
+      setIsRecording(false);
+      return promise;
     }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-    }
-    if (durationIntervalRef.current) {
-      clearInterval(durationIntervalRef.current);
-    }
-    setIsRecording(false);
+    return Promise.resolve(null);
   };
 
   const handlePlay = () => {
@@ -141,14 +155,22 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
 
     setIsUploading(true);
     try {
+      // If a voice recording is still in progress, stop it first and wait for
+      // the final blob so it gets included in the upload.
+      let blobToUpload = audioBlob;
+      if (isRecording) {
+        const stoppedBlob = await stopRecording();
+        if (stoppedBlob) blobToUpload = stoppedBlob;
+      }
+
       const formData = new FormData();
       formData.append("image", image);
 
       // Audio takes precedence over text when both are present
-      if (audioBlob) {
+      if (blobToUpload) {
         // Name must match swagger spec (which mentions 'audio' binary file field)
-        const ext = audioBlob.type.includes("webm") ? "webm" : "wav";
-        formData.append("audio", audioBlob, `note.${ext}`);
+        const ext = blobToUpload.type.includes("webm") ? "webm" : "wav";
+        formData.append("audio", blobToUpload, `note.${ext}`);
       } else if (textNote.trim()) {
         formData.append("note", textNote.trim());
       }
