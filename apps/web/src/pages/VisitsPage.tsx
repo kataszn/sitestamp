@@ -166,9 +166,20 @@ export const VisitsPage: React.FC = () => {
                       <span>· {new Date(visit.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  <span className="status-pill" style={{ flexShrink: 0 }}>
-                    {open ? "Open" : "Complete"}
-                  </span>
+                  {open ? (
+                    <span className="status-pill" style={{ flexShrink: 0 }}>
+                      Open
+                    </span>
+                  ) : (
+                    <span
+                      className="defect-tag"
+                      data-level={visit.report?.severity ?? "LOW"}
+                      style={{ flexShrink: 0, fontSize: "11px", padding: "3px 10px" }}
+                      title={`Report severity: ${visit.report?.severity ?? "N/A"}`}
+                    >
+                      {visit.report?.severity ?? "COMPLETE"}
+                    </span>
+                  )}
                 </div>
               );
             })}
