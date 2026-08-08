@@ -12,6 +12,11 @@ const FILTERS: { key: Filter; label: string }[] = [
 
 const isOpen = (v: VisitDTO) => v.status !== "COMPLETE";
 
+// Truncate long note text in the list; "..." signals the note continues.
+const NOTE_CHAR_LIMIT = 80;
+const truncateNote = (note: string) =>
+  note.length > NOTE_CHAR_LIMIT ? `${note.slice(0, NOTE_CHAR_LIMIT).trimEnd()}...` : note;
+
 export const VisitsPage: React.FC = () => {
   const navigate = useNavigate();
   const [visits, setVisits] = useState<VisitDTO[]>([]);
@@ -219,7 +224,14 @@ export const VisitsPage: React.FC = () => {
                         </span>
                       )}
                       <span>Inspector: <b>{visit.inspectorName}</b></span>
-                      {visit.notes && <span>· {visit.notes}</span>}
+                      {visit.notes && (
+                        <span
+                          style={{ maxWidth: "340px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                          title={visit.notes}
+                        >
+                          · {truncateNote(visit.notes)}
+                        </span>
+                      )}
                       <span>· {new Date(visit.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
