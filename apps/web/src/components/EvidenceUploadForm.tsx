@@ -8,6 +8,7 @@ interface EvidenceUploadFormProps {
 export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload }) => {
   const { showToast } = useToast();
   const [image, setImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [textNote, setTextNote] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
@@ -26,8 +27,30 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setImage(e.target.files[0]);
+      const file = e.target.files[0];
+      setImage(file);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(URL.createObjectURL(file));
     }
+  };
+
+  const handleChangePhoto = () => {
+    const fileInput = document.getElementById("evidenceImage") as HTMLInputElement;
+    if (fileInput) fileInput.click();
+  };
+
+  const handleRemovePhoto = () => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(null);
+    setImage(null);
+    const fileInput = document.getElementById("evidenceImage") as HTMLInputElement;
+    if (fileInput) fileInput.value = "";
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   const startRecording = async () => {
@@ -134,6 +157,8 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
 
       // Reset Form State
       setImage(null);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
       setTextNote("");
       setAudioBlob(null);
       if (audioUrl) URL.revokeObjectURL(audioUrl);
@@ -167,7 +192,124 @@ export const EvidenceUploadForm: React.FC<EvidenceUploadFormProps> = ({ onUpload
           onChange={handleImageChange}
           required
           disabled={isUploading}
+          style={{ display: "none" }}
         />
+
+        {previewUrl && image ? (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+              padding: "12px",
+              border: "1.5px solid var(--line)",
+              borderRadius: "10px",
+              background: "var(--surface)",
+            }}
+          >
+            <div
+              style={{
+                width: "72px",
+                height: "72px",
+                flexShrink: 0,
+                borderRadius: "8px",
+                overflow: "hidden",
+                border: "1px solid var(--line)",
+                background: "var(--blueprint)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <img
+                src={previewUrl}
+                alt="Photo preview"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontFamily: "Space Grotesk, sans-serif",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  color: "var(--ink)",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {image.name}
+              </div>
+              <div
+                style={{
+                  fontFamily: "IBM Plex Mono, monospace",
+                  fontSize: "12px",
+                  color: "var(--steel)",
+                  marginTop: "2px",
+                }}
+              >
+                {formatFileSize(image.size)}
+              </div>
+              <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
+                <button
+                  type="button"
+                  className="btn"
+                  style={{
+                    background: "transparent",
+                    color: "var(--blueprint)",
+                    border: "1.5px solid var(--blueprint)",
+                    padding: "4px 12px",
+                    fontSize: "12px",
+                  }}
+                  onClick={handleChangePhoto}
+                  disabled={isUploading}
+                >
+                  Change
+                </button>
+                <button
+                  type="button"
+                  className="btn"
+                  style={{
+                    background: "transparent",
+                    color: "var(--critical)",
+                    border: "1.5px solid var(--critical)",
+                    padding: "4px 12px",
+                    fontSize: "12px",
+                  }}
+                  onClick={handleRemovePhoto}
+                  disabled={isUploading}
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div
+            onClick={handleChangePhoto}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              padding: "28px 16px",
+              border: "1.5px dashed var(--line)",
+              borderRadius: "10px",
+              background: "var(--surface)",
+              cursor: "pointer",
+              color: "var(--steel)",
+              fontFamily: "IBM Plex Mono, monospace",
+              fontSize: "12px",
+              letterSpacing: "0.04em",
+              textTransform: "uppercase",
+            }}
+          >
+            <span style={{ fontSize: "22px" }}>📷</span>
+            <span>Click to choose a photo</span>
+          </div>
+        )}
       </div>
 
       <div className="form-group">
