@@ -125,7 +125,11 @@ export function ReportView({ visit, readOnly = false }: { visit: VisitDTO; readO
       {/* 2. Title block */}
       <div className="titleblock">
         <div className="eyebrow">
-          <span>SiteStamp · Field Inspection Report</span>
+          <span>
+            <Link to="/" className="brand-link" title="Back to Home">SiteStamp</Link>
+            <span className="eyebrow-sep">·</span>
+            Field Inspection Report
+          </span>
           <span>Visit #{id}</span>
         </div>
         <h1 className="site-name">{siteName}</h1>
