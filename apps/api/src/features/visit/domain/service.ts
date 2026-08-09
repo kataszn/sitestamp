@@ -36,7 +36,7 @@ export const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO>
   // image: save to storage
   const ext = path.extname(image.originalname) || '.jpg';
   const filename = `${note || randomUUID()}-${ext}`;
-  const processedBuffer = await prepareImageForUpload(image.buffer);
+  const processedBuffer = await prepareImageForAnalysis(image.buffer);
   const imageUrl = await storage.save(processedBuffer, filename, image.mimetype);
   
 
@@ -53,10 +53,10 @@ export const addEvidence = async (input: AddEvidenceInput): Promise<EvidenceDTO>
   return mapper.toEvidenceDTO(evidence);
 };
 
-async function prepareImageForUpload(buffer: Buffer): Promise<Buffer> {
+async function prepareImageForAnalysis(buffer: Buffer): Promise<Buffer> {
   const resized = await sharp(buffer)
-    .resize(1600, 1600, { fit: 'inside', withoutEnlargement: true })
-    .jpeg({ quality: 78 })
+    .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
+    .jpeg({ quality: 65 })
     .toBuffer();
   return resized;
 }
@@ -98,6 +98,7 @@ export const generateReport = async (visitId: string): Promise<ReportDTO> => {
     const evidenceInputs = await Promise.all(
       visit.evidence.map(async (e) => {
         const imageBuffer = await storage.read(e.imageUrl);
+        console.log(`Sending image: ${(imageBuffer.length / 1024).toFixed(0)}KB`);
         return { imageBuffer, mimeType: e.mimeType, note: e.note };
       })
     );
