@@ -9,57 +9,55 @@ datasource db {
 
 model Visit {
   id            String      @id @default(cuid())
-  assetCode     String?  // optional, e.g. "BRG-MB-003" - stable identifier across visits to the same asset
   inspectorName String
   siteName      String
   notes         String?
   status        VisitStatus @default(OPEN)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-
-  lastError String?
-
-  evidence Evidence[]
-  report   Report?
-}
-
-enum VisitStatus {
-  OPEN // still collecting evidence
-  GENERATING // report submission in flight
-  COMPLETE
-  FAILED
+  lastError     String?
+  assetCode     String?
+  evidence      Evidence[]
+  report        Report?
 }
 
 model Evidence {
-  id            String        @id @default(cuid())
-  visitId       String
-  visit         Visit         @relation(fields: [visitId], references: [id])
-  imageUrl      String
-  mimeType      String
-  note          String? // final text, if noteSource is VOICE, this is the transcript
-  noteSource    NoteSource? @default(TEXT)
-  audioUrl      String? // kept for reference/playback, not sent to Gemma again
-  createdAt     DateTime      @default(now())
+  id         String      @id @default(cuid())
+  visitId    String
+  imageUrl   String
+  mimeType   String
+  audioUrl   String?
+  createdAt  DateTime    @default(now())
+  note       String?
+  noteSource NoteSource? @default(TEXT)
+  visit      Visit       @relation(fields: [visitId], references: [id])
+}
+
+model Report {
+  id                   String   @id @default(cuid())
+  visitId              String   @unique
+  summary              String
+  severity             Severity
+  defects              Json
+  recommendation       String
+  needsReview          Boolean  @default(false)
+  rawModelJson         Json
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  historicalAssessment Json?
+  visit                Visit    @relation(fields: [visitId], references: [id])
+}
+
+enum VisitStatus {
+  OPEN
+  GENERATING
+  COMPLETE
+  FAILED
 }
 
 enum NoteSource {
   TEXT
   VOICE
-}
-
-model Report {
-  id                    String   @id @default(cuid())
-  visitId               String   @unique
-  visit                 Visit    @relation(fields: [visitId], references: [id])
-  summary               String
-  severity              Severity
-  defects               Json // DefectData[]
-  recommendation String
-  needsReview           Boolean  @default(false)
-  historicalAssessment  Json?   // nullable — absent when no history was used
-  rawModelJson          Json // full Gemma response
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
 }
 
 enum Severity {
