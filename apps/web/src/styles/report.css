@@ -258,6 +258,8 @@ body {
   letter-spacing: 0.06em;
   color: var(--steel);
   border-right: 1px solid var(--ink);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 .gauge-seg:last-child { border-right: none; }
 .gauge-seg[data-level="LOW"] { background: color-mix(in srgb, var(--low) 12%, white); }
@@ -437,6 +439,10 @@ body {
   width: 26px;
   border-radius: 1px;
   transition: height 0.2s ease;
+  /* Ensure colored bars survive print/PDF export (backgrounds are otherwise
+     stripped unless the browser is told to print them). */
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
 }
 .trend-bar[data-level="LOW"] { background: var(--low); }
 .trend-bar[data-level="MODERATE"] { background: var(--moderate); }
@@ -580,6 +586,14 @@ body {
   .report-page { padding: 0; }
   .sheet { box-shadow: none; }
   .footer-actions { display: none; }
+  .gauge-seg {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .trend-bar {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 }
 
 /* Additional non-report components standard/base styling helper */
