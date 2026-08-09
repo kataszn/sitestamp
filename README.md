@@ -4,6 +4,8 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-6.x-3178C6)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
+[![SiteStamp demo video](https://img.youtube.com/vi/QdnxiwtwRCw/maxresdefault.jpg)](https://www.youtube.com/watch?v=QdnxiwtwRCw)
+
 > AI-powered infrastructure inspection platform that transforms multimodal field evidence into trustworthy engineering reports with evidence-backed findings and historical asset intelligence.
 
 Built for the **Build with Gemma Hackathon Series (2026)** using **Gemma 4**.
