@@ -179,6 +179,18 @@ packages/
 
 ---
 
+## Acknowledgments
+
+Sample inspection imagery used for demo and screenshot purposes is sourced from the
+**dacl10k** dataset (Flotzinger, J., Rösch, P. J., & Braml, T. (2023). *dacl10k: Benchmark
+for Semantic Bridge Damage Segmentation*. [arXiv:2309.00460](https://arxiv.org/abs/2309.00460)),
+used under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). These images are
+not redistributed in this repository.
+
+Built for [Build with Gemma: TFUG Prayagraj [AI Prayagraj]](https://www.kaggle.com/competitions/build-with-gemma-tfug-prayagraj-ai-prayagraj), using Gemma 4 and the Gemini API.
+
+---
+
 ## License
 
 MIT
