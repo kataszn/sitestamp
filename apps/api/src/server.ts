@@ -1,7 +1,7 @@
 import express from "express";
 import { registerMiddlewares, errorHandler, notFoundHandler } from "#core/middlewares";
 import { createV1Routes } from "#core/route";
-import { connectDB, isDBConnected } from "#core/db";
+import { connectDB, pingDB } from "#core/db";
 import { openApiSpec } from "#core/openapi";
 import swaggerUi from "swagger-ui-express";
 import { ENV } from "#core/env";
@@ -14,10 +14,10 @@ export async function createServer(): Promise<express.Express> {
   // Ensure upload directory exists
   await fs.mkdir(ENV.UPLOAD_DIR, { recursive: true });
 
-  const db = await connectDB();
+  await connectDB();
 
   app.get("/health", async (_req: express.Request, res: express.Response) => {
-    const connected = await isDBConnected(db);
+    const connected = await pingDB();
     res.status(connected ? 200 : 503).json({
       status: "ok",
       timestamp: new Date().toISOString(),
