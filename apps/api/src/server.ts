@@ -14,10 +14,10 @@ export async function createServer(): Promise<express.Express> {
   // Ensure upload directory exists
   await fs.mkdir(ENV.UPLOAD_DIR, { recursive: true });
 
-  await connectDB();
+  const db = await connectDB();
 
   app.get("/health", async (_req: express.Request, res: express.Response) => {
-    const connected = await pingDB();
+    const connected = await pingDB(db);
     res.status(connected ? 200 : 503).json({
       status: "ok",
       timestamp: new Date().toISOString(),

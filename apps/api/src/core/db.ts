@@ -17,9 +17,8 @@ export async function connectDB(): Promise<PrismaClient> {
   return prisma;
 }
 
-export async function pingDB(): Promise<boolean> {
+export async function pingDB(prisma: PrismaClient): Promise<boolean> {
   try {
-    const prisma = getDB();
     await prisma.$queryRaw`SELECT 1`;
     return true;
   } catch (error) {
